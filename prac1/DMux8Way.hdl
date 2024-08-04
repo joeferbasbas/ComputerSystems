@@ -17,4 +17,34 @@ CHIP DMux8Way {
 
     PARTS:
     // Put your code here:
+    DMux8Way(a=in, sel=sel[0], out=a1);
+    DMux8Way(a=in, sel=sel[0], out=b1);
+    DMux8Way(a=in, sel=sel[0], out=c1);
+    DMux8Way(a=in, sel=sel[0], out=d1);
+    DMux8Way(a=in, sel=sel[0], out=e1);
+    DMux8Way(a=in, sel=sel[0], out=f1);
+    DMux8Way(a=in, sel=sel[0], out=g1);
+    DMux8Way(a=in, sel=sel[0], out=h1);
+
+    DMux8Way(a=a1, sel=sel[1], out=outa2);
+    DMux8Way(a=b1, sel=sel[1], out=outb2);
+    DMux8Way(a=c1, sel=sel[1], out=outc2);
+    DMux8Way(a=d1, sel=sel[1], out=outd2);
+    DMux8Way(a=e1, sel=sel[1], out=oute2);
+    DMux8Way(a=f1, sel=sel[1], out=outf2);
+    DMux8Way(a=g1, sel=sel[1], out=outg2);
+    DMux8Way(a=h1, sel=sel[1], out=outh2);
+
+    DMux8Way(a=a2, sel=sel[2], out=a);
+    DMux8Way(a=b2, sel=sel[2], out=b);
+    DMux8Way(a=c2, sel=sel[2], out=c);
+    DMux8Way(a=d2, sel=sel[2], out=d);
+    DMux8Way(a=e2, sel=sel[2], out=e);
+    DMux8Way(a=f2, sel=sel[2], out=f);
+    DMux8Way(a=g2, sel=sel[2], out=g);
+    DMux8Way(a=h2, sel=sel[2], out=h);
+
+
+
+
 }

@@ -11,4 +11,39 @@ CHIP And16Way {
 
     PARTS:
     // Put your code here:
+    Not(in=in[0], out=not0);
+    Not(in=in[1], out=not1);
+    Not(in=in[2], out=not2);
+    Not(in=in[3], out=not3);
+    Not(in=in[4], out=not4);
+    Not(in=in[5], out=not5);
+    Not(in=in[6], out=not6);
+    Not(in=in[7], out=not7);
+    Not(in=in[8], out=not8);
+    Not(in=in[9], out=not9);
+    Not(in=in[10], out=not10);
+    Not(in=in[11], out=not11);
+    Not(in=in[12], out=not12);
+    Not(in=in[13], out=not13);
+    Not(in=in[14], out=not14);
+    Not(in=in[15], out=not15);
+
+    And(a=in[0], b=in[1], out=out1); 
+    And(a=in[2], b=in[3], out=out2); 
+    And(a=in[4], b=in[5], out=out3);
+    And(a=in[6], b=in[7], out=out4); 
+    And(a=in[8], b=in[9], out=out5);
+    And(a=in[10], b=in[11], out=out6); 
+    And(a=in[12], b=in[13], out=out7);
+    And(a=in[14], b=in[15], out=out8);
+
+    And(a=out1, b=out2, out=out12);
+    And(a=out3, b=out4, out=out34);
+    And(a=out5, b=out6, out=out56);
+    And(a=out7, b=out8, out=out78);
+
+    And(a=out12, b=out34, out=out1234);
+    And(a=out56, b=out78, out=out5678);
+    
+    And(a=out1234, b=out5678, out=out);
 }

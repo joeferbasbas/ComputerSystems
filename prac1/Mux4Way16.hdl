@@ -17,4 +17,147 @@ CHIP Mux4Way16 {
 
     PARTS:
     // Put your code here:
+    // Not(in=sel[0], out=notsel0);
+    // Not(in=sel[1], out=notsel1);
+    
+    // And(a=notsel0, b=notsel1, out=sel00);
+    // And(a=notsel0, b=sel[1], out=sel01);
+    // And(a=sel[0], b=notsel1, out=sel10);
+    // And(a=sel[0], b=sel[1], out=sel11);
+
+    // And(a=a[0], b=sel00, out=outa0);
+    // And(a=a[1], b=sel00, out=outa1);
+    // And(a=a[2], b=sel00, out=outa2);
+    // And(a=a[3], b=sel00, out=outa3);
+    // And(a=a[4], b=sel00, out=outa4);
+    // And(a=a[5], b=sel00, out=outa5);
+    // And(a=a[6], b=sel00, out=outa6);
+    // And(a=a[7], b=sel00, out=outa7);
+    // And(a=a[8], b=sel00, out=outa8);
+    // And(a=a[9], b=sel00, out=outa9);
+    // And(a=a[10], b=sel00, out=outa10);
+    // And(a=a[11], b=sel00, out=outa11);
+    // And(a=a[12], b=sel00, out=outa12);
+    // And(a=a[13], b=sel00, out=outa13);
+    // And(a=a[14], b=sel00, out=outa14);
+    // And(a=a[15], b=sel00, out=outa15);
+
+    // And(a=b[0], b=sel01, out=outb0);
+    // And(a=b[1], b=sel01, out=outb1);
+    // And(a=b[2], b=sel01, out=outb2);
+    // And(a=b[3], b=sel01, out=outb3);
+    // And(a=b[4], b=sel01, out=outb4);
+    // And(a=b[5], b=sel01, out=outb5);
+    // And(a=b[6], b=sel01, out=outb6);
+    // And(a=b[7], b=sel01, out=outb7);
+    // And(a=b[8], b=sel01, out=outb8);
+    // And(a=b[9], b=sel01, out=outb9);
+    // And(a=b[10], b=sel01, out=outb10);
+    // And(a=b[11], b=sel01, out=outb11);
+    // And(a=b[12], b=sel01, out=outb12);
+    // And(a=b[13], b=sel01, out=outb13);
+    // And(a=b[14], b=sel01, out=outb14);
+    // And(a=b[15], b=sel01, out=outb15);
+ 
+    // And(a=c[0], b=sel10, out=outc0);
+    // And(a=c[1], b=sel10, out=outc1);
+    // And(a=c[2], b=sel10, out=outc2);
+    // And(a=c[3], b=sel10, out=outc3);
+    // And(a=c[4], b=sel10, out=outc4);
+    // And(a=c[5], b=sel10, out=outc5);
+    // And(a=c[6], b=sel10, out=outc6);
+    // And(a=c[7], b=sel10, out=outc7);
+    // And(a=c[8], b=sel10, out=outc8);
+    // And(a=c[9], b=sel10, out=outc9);
+    // And(a=c[10], b=sel10, out=outc10);
+    // And(a=c[11], b=sel10, out=outc11);
+    // And(a=c[12], b=sel10, out=outc12);
+    // And(a=c[13], b=sel10, out=outc13);
+    // And(a=c[14], b=sel10, out=outc14);
+    // And(a=c[15], b=sel10, out=outc15);
+
+    // And(a=d[0], b=sel11, out=outd0);
+    // And(a=d[1], b=sel11, out=outd1);
+    // And(a=d[2], b=sel11, out=outd2);
+    // And(a=d[3], b=sel11, out=outd3);
+    // And(a=d[4], b=sel11, out=outd4);
+    // And(a=d[5], b=sel11, out=outd5);
+    // And(a=d[6], b=sel11, out=outd6);
+    // And(a=d[7], b=sel11, out=outd7);
+    // And(a=d[8], b=sel11, out=outd8);
+    // And(a=d[9], b=sel11, out=outd9);
+    // And(a=d[10], b=sel11, out=outd10);
+    // And(a=d[11], b=sel11, out=outd11);
+    // And(a=d[12], b=sel11, out=outd12);
+    // And(a=d[13], b=sel11, out=outd13);
+    // And(a=d[14], b=sel11, out=outd14);
+    // And(a=d[15], b=sel11, out=outd15);
+
+    // Or(a=outa0, b=outb0, out=outab0);
+    // Or(a=outc0, b=outd0, out=outcd0);
+    // Or(a=outab0, b=outcd0, out=out[0]);
+
+    // Or(a=outa1, b=outb1, out=outab1);
+    // Or(a=outc1, b=outd1, out=outcd1);
+    // Or(a=outab1, b=outcd1, out=out[1]);
+
+    // Or(a=outa2, b=outb2, out=outab2);
+    // Or(a=outc2, b=outd2, out=outcd2);
+    // Or(a=outab2, b=outcd2, out=out[2]);
+
+    // Or(a=outa3, b=outb3, out=outab3);
+    // Or(a=outc3, b=outd3, out=outcd3);
+    // Or(a=outab3, b=outcd3, out=out[3]);
+
+    // Or(a=outa4, b=outb4, out=outab4);
+    // Or(a=outc4, b=outd4, out=outcd4);
+    // Or(a=outab4, b=outcd4, out=out[4]);
+
+    // Or(a=outa5, b=outb5, out=outab5);
+    // Or(a=outc5, b=outd5, out=outcd5);
+    // Or(a=outab5, b=outcd5, out=out[5]);
+
+    // Or(a=outa6, b=outb6, out=outab6);
+    // Or(a=outc6, b=outd6, out=outcd6);
+    // Or(a=outab6, b=outcd6, out=out[6]);
+
+    // Or(a=outa7, b=outb7, out=outab7);
+    // Or(a=outc7, b=outd7, out=outcd7);
+    // Or(a=outab7, b=outcd7, out=out[7]);
+
+    // Or(a=outa8, b=outb8, out=outab8);
+    // Or(a=outc8, b=outd8, out=outcd8);
+    // Or(a=outab8, b=outcd8, out=out[8]);
+
+    // Or(a=outa9, b=outb9, out=outab9);
+    // Or(a=outc9, b=outd9, out=outcd9);
+    // Or(a=outab9, b=outcd9, out=out[9]);
+    
+    // Or(a=outa10, b=outb10, out=outab10);
+    // Or(a=outc10, b=outd10, out=outcd10);
+    // Or(a=outab10, b=outcd10, out=out[10]);
+    
+    // Or(a=outa11, b=outb11, out=outab11);
+    // Or(a=outc11, b=outd11, out=outcd11);
+    // Or(a=outab11, b=outcd11, out=out[11]);
+
+    // Or(a=outa12, b=outb12, out=outab12);
+    // Or(a=outc12, b=outd12, out=outcd12);
+    // Or(a=outab12, b=outcd12, out=out[12]);
+
+    // Or(a=outa13, b=outb13, out=outab13);
+    // Or(a=outc13, b=outd13, out=outcd13);
+    // Or(a=outab13, b=outcd13, out=out[13]);
+
+    // Or(a=outa14, b=outb14, out=outab14);
+    // Or(a=outc14, b=outd14, out=outcd14);
+    // Or(a=outab14, b=outcd14, out=out[14]);
+
+    // Or(a=outa15, b=outb15, out=outab15);
+    // Or(a=outc15, b=outd15, out=outcd15);
+    // Or(a=outab15, b=outcd15, out=out[15]);
+    Mux16(a=a, b=b, sel=sel[0], out=ab);
+    Mux16(a=c, b=d, sel=sel[0], out=cd);
+
+    Mux16(a=ab, b=cd, sel=sel[1], out=out);
 }
