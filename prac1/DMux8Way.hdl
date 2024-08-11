@@ -16,12 +16,17 @@ CHIP DMux8Way {
     OUT a, b, c, d, e, f, g, h;
 
     PARTS:
-    // First level: DMux4Way to split input into four groups
+    // Put your code here:
     DMux4Way(in=in, sel=sel[1..2], a=ab, b=cd, c=ef, d=gh);
 
-    // Second level: Use DMux to further split each group into two
-    DMux(in=ab, sel=sel[0], a=a, b=b);
-    DMux(in=cd, sel=sel[0], a=c, b=d);
-    DMux(in=ef, sel=sel[0], a=e, b=f);
-    DMux(in=gh, sel=sel[0], a=g, b=h);
+    Dmux(in=ab, sel=sel[0], a=a, b=b);
+    Dmux(in=cd, sel=sel[0], a=c, b=d);
+    Dmux(in=ef, sel=sel[0], a=e, b=f);
+    Dmux(in=gh, sel=sel[0], a=g, b=h);
+
+
+
+
+
+
 }
