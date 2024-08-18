@@ -43,4 +43,86 @@ CHIP ALU {
 
     PARTS:
    // Put you code here:
+   Mux16(a=x, b=false, sel=zx, out=x1);
+   Not16(in=x1, out=notX1);
+   Mux16(a=x1, b=notX1, sel=nx, out=x2);
+
+   Mux16(a=y, b=false, sel=zy, out=y1);
+   Not16(in=y1, out=notY1);
+   Mux16(a=y1, b=notY1, sel=ny, out=y2);
+
+   And16(a=x2, b=y2, out=xAndY);
+   Add16(a=x2, b=y2, out=xAddY);
+
+   Mux16(a=xAndY, b=xAddY, sel=f, out=fout);
+
+   Not16(in=fout, out=notFout);
+   Mux16(a=fout, b=notFout, sel=no, out=out);
+
+
+   
+    DMux(in=out[0], sel=false, a=pathA[0], b=pathB[0]);
+    DMux(in=out[1], sel=false, a=pathA[1], b=pathB[1]);
+    DMux(in=out[2], sel=false, a=pathA[2], b=pathB[2]);
+    DMux(in=out[3], sel=false, a=pathA[3], b=pathB[3]);
+    DMux(in=out[4], sel=false, a=pathA[4], b=pathB[4]);
+    DMux(in=out[5], sel=false, a=pathA[5], b=pathB[5]);
+    DMux(in=out[6], sel=false, a=pathA[6], b=pathB[6]);
+    DMux(in=out[7], sel=false, a=pathA[7], b=pathB[7]);
+    DMux(in=out[8], sel=false, a=pathA[8], b=pathB[8]);
+    DMux(in=out[9], sel=false, a=pathA[9], b=pathB[9]);
+    DMux(in=out[10], sel=false, a=pathA[10], b=pathB[10]);
+    DMux(in=out[11], sel=false, a=pathA[11], b=pathB[11]);
+    DMux(in=out[12], sel=false, a=pathA[12], b=pathB[12]);
+    DMux(in=out[13], sel=false, a=pathA[13], b=pathB[13]);
+    DMux(in=out[14], sel=false, a=pathA[14], b=pathB[14]);
+    DMux(in=out[15], sel=false, a=pathA[15], b=pathB[15]);
+
+    Or8Way(in=pathA[0..7], out=pathALow8);
+    Or8Way(in=pathA[8..15], out=pathAHigh8);
+    Or(a=pathALow8, b=pathAHigh8, out=pathAOr);
+    Not(in=pathAOr, out=zr);
+
+    And(a=pathB[15], b=true, out=ng);
+}
+
+
+   
+   
+   
+   
+   
+   
+   
+
+
+    
+   
+   
+   
+   
+//    Or8Way(in=out, out=out1);
+//    Or8Way(in=out, out=out2);
+   Not(in=out3, out=zr);
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+   
+   
+
+   
+   
 }
