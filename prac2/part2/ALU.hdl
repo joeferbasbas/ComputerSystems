@@ -92,37 +92,3 @@ CHIP ALU {
    
    
    
-   
-   
-
-
-    
-   
-   
-   
-   
-//    Or8Way(in=out, out=out1);
-//    Or8Way(in=out, out=out2);
-   Not(in=out3, out=zr);
-
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-
-   
-   
-
-   
-   
-}
