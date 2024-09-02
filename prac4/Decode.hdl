@@ -1,0 +1,96 @@
+// File name: Decode.hdl
+
+/**
+ * The instruction decoder determines the type of instruction (a or c)
+ * and decodes those instructions.
+ * The input in[16] is the instruction to be decoded.
+ * The outputs are used as follows:
+ *   type:      0 if a-instruction, 1 if c-instruction. 
+ *   a:         Determines whether the ALU input uses A (0) or Memory[A] (1)
+ *   c1 .. c6:  Op-code wires to ALU
+ *   d1 d2 d3:  Destination wires to the load pins of A,D registers and Memory
+ *   j1 j2 j3:  Jump wires to Jump Unit
+ * For a-instructions, d1 should be 1, all other outputs should be 0
+ * For c-instructions, outputs should correspond to their bits in the c-instruction
+ */
+
+CHIP Decode {
+
+    IN  in[16];             // instruction to decode
+
+    OUT type,               // Instruction type
+        a,                  // ALU A/M
+        c1,c2,c3,c4,c5,c6,  // Op-code wires to ALU
+        d1,d2,d3,           // Destination wires
+        j1,j2,j3;           // Jump wires
+
+PARTS:
+    // Put your code here:
+    And(a=in[15], b=true, out=typeWire);
+
+    // Assign type based on the intermediate wire
+    And(a=typeWire, b=true, out=type);
+
+    // Use type in further logic
+    Not(in=typeWire, out=notType);
+
+    And(a=notType, b=true, out=d1A);
+    And(a=notType, b=false, out=d20);
+    And(a=notType, b=false, out=d30);
+    
+    And(a=notType, b=false, out=a0);
+    
+
+    And(a=notType, b=false, out=c10);
+    And(a=notType, b=false, out=c20);
+    And(a=notType, b=false, out=c30);
+    And(a=notType, b=false, out=c40);
+    And(a=notType, b=false, out=c50);
+    And(a=notType, b=false, out=c60);
+    
+    And(a=notType, b=false, out=j10);
+    And(a=notType, b=false, out=j20);
+    And(a=notType, b=false, out=j30);
+
+
+    And(a=typeWire, b=in[12], out=a1);
+    And(a=typeWire, b=in[11], out=c11);
+    And(a=typeWire, b=in[10], out=c21);
+    And(a=typeWire, b=in[9], out=c31);
+    And(a=typeWire, b=in[8], out=c41);
+    And(a=typeWire, b=in[7], out=c51);
+    And(a=typeWire, b=in[6], out=c61);
+
+
+    And(a=typeWire, b=in[5], out=d1C);
+    And(a=typeWire, b=in[4], out=d21);
+    And(a=typeWire, b=in[3], out=d31);
+
+    And(a=typeWire, b=in[2], out=j11);
+    And(a=typeWire, b=in[1], out=j21);
+    And(a=typeWire, b=in[0], out=j31);
+    
+
+    Or(a=d1A, b=d1C, out=d1);
+    Or(a=d20, b=d21, out=d2);
+    Or(a=d30, b=d31, out=d3);
+
+    Or(a=a0, b=a1, out=a);
+
+    Or(a=c10, b=c11, out=c1);
+    Or(a=c20, b=c21, out=c2);
+    Or(a=c30, b=c31, out=c3);
+    Or(a=c40, b=c41, out=c4);
+    Or(a=c50, b=c51, out=c5);
+    Or(a=c60, b=c61, out=c6);
+
+    
+    Or(a=j10, b=j11, out=j1);
+    Or(a=j20, b=j21, out=j2);
+    Or(a=j30, b=j31, out=j3);
+        
+    
+    
+    
+    
+}
