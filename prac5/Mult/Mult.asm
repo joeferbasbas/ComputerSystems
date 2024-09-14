@@ -22,9 +22,14 @@ D;JLT
 @POS
 D;JGT
 
+
+
+
 (POS)
 @R2
-D = M            
+D = M
+@NEGPOS
+D;JLT
 
 @R0
 M = M + D        
@@ -44,6 +49,8 @@ D;JEQ
 (NEG)
 @R2
 D = M
+@NEGPOS
+D;JGT
 
 @R0
 M = M + D
@@ -57,6 +64,15 @@ D;JLE
 
 @R0
 D = !M
+M = D
+
+(NEGPOS)
+D = !M
+@R0
+M = M + D        
+
+@R1        
+D = M + 1
 M = D
 
 (END)
