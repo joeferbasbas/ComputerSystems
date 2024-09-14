@@ -1,13 +1,3 @@
-// This file is based on part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: Mult.asm
-
-// Multiplies R1 and R2 and stores the result in R0.
-// (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
-
-// Put your code here.
-
 @R0
 M = 0            
 
@@ -23,12 +13,10 @@ D;JLT
 D;JGT
 
 
-
-
 (POS)
 @R2
 D = M
-@NEGPOS
+@POSNEG
 D;JLT
 
 @R0
@@ -44,6 +32,13 @@ D;JGT
 D = M          
 @END
 D;JEQ
+
+
+
+
+
+
+
 
 
 (NEG)
@@ -66,7 +61,24 @@ D;JLE
 D = !M
 M = D
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 (NEGPOS)
+D = M
+@POSNEG
+D;JGT
+
 D = !M
 @R0
 M = M + D        
@@ -74,6 +86,32 @@ M = M + D
 @R1        
 D = M + 1
 M = D
+@NEGPOS
+D;JLE
+
+
+
+
+
+
+
+
+
+
+
+
+(POSNEG)
+@R2
+D = M
+@R0
+M = M + D        
+
+@R1        
+D = M - 1
+M = D
+@POSNEG
+D;JGT
+
 
 (END)
 @END
