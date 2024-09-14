@@ -9,19 +9,30 @@
 // Put your code here.
 
 @R0
-M = 0
+M = 0            
 
 @R1
-D = M
-D;JEQ
+D = M            
+@END
+D;JEQ            
 
 (LOOP)
 @R2
-D = M
+D = M            
 
 @R0
-M = M + D
+M = M + D        
+
+@R1        
+D = M - 1
+M = D
+
 @LOOP
-D;JGT
+D;JGT          
+
+@R0
+D = M
 
 (END)
+@END
+0;JMP             
