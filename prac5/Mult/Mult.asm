@@ -16,6 +16,10 @@ D = M
 @END
 D;JEQ            
 
+@NEG
+D;JLT
+
+
 (LOOP)
 @R2
 D = M            
@@ -32,6 +36,26 @@ D;JGT
 
 @R0
 D = M
+
+
+
+(NEG)
+@R2
+D = M
+
+@R0
+M = M + D
+
+@R1
+D = M + 1
+M = D
+
+@NEG
+D;JLE
+
+@R0
+D = !M
+M = D
 
 (END)
 @END
