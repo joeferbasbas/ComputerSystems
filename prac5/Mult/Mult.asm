@@ -19,8 +19,10 @@ D;JEQ
 @NEG
 D;JLT
 
+@POS
+D;JGT
 
-(LOOP)
+(POS)
 @R2
 D = M            
 
@@ -31,12 +33,12 @@ M = M + D
 D = M - 1
 M = D
 
-@LOOP
-D;JGT          
-
-@R0
-D = M
-
+@POS
+D;JGT
+@R1
+D = M          
+@END
+D;JEQ
 
 
 (NEG)
