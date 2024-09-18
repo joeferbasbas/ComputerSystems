@@ -1,37 +1,113 @@
-@2	//GO TO FINAL ANSWER BOX
-M=0	//ZERO ANS BOX
+@R0
+M = 0            
 
-@0
-D=M
+@R1
+D = M            
 @END
-D;JEQ	//IF ONE PRODUCT IS ZERO
+D;JEQ            
 
-@1
-D=M
+@CHECKNEGATIVES
+D;JLT
+
+@NEG
+D;JLT
+
+@POS
+D;JGT
+
+
+
+
+
+
+
+
+(POS)
+@R2
+D = M
+
+@R0
+M = M + D        
+
+@R1        
+D = M - 1
+M = D
+
+@POS
+D;JGT
+@R1
+D = M          
 @END
-D;JEQ	//IF ONE PRODUCT IS ZERO
-
-@0	//NOT NECESSARY
-D=M	//
-@3	//
-M=D	//ONLY TO KEEP THE NUMBERS BEING MUTLIPLED
+D;JEQ
 
 
-(LOOP)
-@1	//GET 2ND NUM
-D=M	//D HAS 2ND NUM
 
-@2	//GO TO FINAL ANSWER BOX
-M=D+M	//RAM[2] NOW HAS 2ND NUMBER + ITS PREVIOUS VALUE
 
-@3	//GET 1ST NUM
-M=M-1	//1ST NUM-1
 
-D=M	//IDK WHY D NEEDS TO =M?
-@LOOP	//WHERE TO JUMP TO
-D;JGT	//JUMP		    (WHY CANT THIS BE M;JGT?)
+
+
+
+
+(NEG)
+@R2
+D = M
+
+
+@R0
+M = M + D
+
+@R1
+D = M + 1
+M = D
+
+@NEG
+D;JLT
+
+@R0
+M = !M
+M = M + 1
+@END
+D;JEQ
+
+
+
+
+
+(CHECKNEGATIVES)
+@R2
+D = M
+@NEG
+D;JLT
+@POSSECONDNUM
+D;JGT
+
+
+
+(POSSECONDNUM)
+@R2
+D = M
+
+@R0
+M = M + D        
+
+@R1        
+D = M + 1
+M = D
+
+@POSSECONDNUM
+D;JLT
+@R0
+M = !M
+M = M + 1
+
+
+@END
+D;JEQ
+
+
+
 
 
 (END)
 @END
-0;JMP	//FOREVER LOOP
+0;JMP             
