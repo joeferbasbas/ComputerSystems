@@ -8,11 +8,16 @@ D = M
 
 @R0
 M = D
-
 (LOOP)
-@R1
-A = A + 1
+@R2
 D = M
+@END
+D;JEQ
+
+@R1
+A = M
+D = M
+
 @R0
 D = D - M
 
@@ -20,29 +25,24 @@ D = D - M
 D;JLT
 
 @NEXT
-D;JGT
-
+0;JMP
 
 (LESS)
-@R1
-D = M
-@R0
-M = D
-@R2
-D = M - 1
+@R1        // Load the current element address again
+A = M      // A = RAM[R1], point to the current element
+D = M      // D = RAM[R1], load the current element value into D
 
-@LOOP
-D;JGT
-
-
-
-
+@R0        // Update R0 with the new smallest value
+M = D      // M = D, store the new smallest value in R0
 
 (NEXT)
-@R0
-M = A
-@R2
-D = M - 1
+@R1        // Move to the next element in the array
+M = M + 1  // Increment R1 to point to the next element in the array
+
+@R2        // Decrement the counter (R2)
+M = M - 1  // R2 = R2 - 1, decrease the number of elements left to check
 
 @LOOP
-D;JGT
+0;JMP
+
+(END)
