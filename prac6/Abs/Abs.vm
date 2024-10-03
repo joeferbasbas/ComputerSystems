@@ -2,7 +2,22 @@
 // x & y are static variables
 
 // Put your code here.
+push static 0
+push constant 0
+gt
+if-goto IF_TRUE
+goto IF_FALSE
 
+
+label IF_TRUE
+push static 0
+pop static 1
+goto END
+
+label IF_FALSE
+push static 0
+neg
+pop static 1
 
 
 label END
