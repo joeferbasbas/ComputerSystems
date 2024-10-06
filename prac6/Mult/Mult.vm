@@ -3,6 +3,75 @@
 // x & y are static variables
 
 // Put your code here.
+push constant 0
+pop local 0
+
+
+push static 0       //this is 3 at ram[16]
+pop static 2        //ram[18] becomes 3
+
+push static 2
+push constant 0
+lt
+if-goto WHILE_NEG
+goto WHILE_START
+
+label WHILE_NEG
+push static 2       //push onto stack
+push constant 0     //push onto stack
+eq                  //compare if ram[18] is equal to 0
+if-goto WHILE_END
+
+push static 1
+push local 0
+add
+pop local 0
+
+
+
+push static 2       //push ram[18] into stack
+push constant 1     //push decrementer
+add                 //increment ram[18] which is 3 until 0
+pop static 2        //put as new val
+
+goto WHILE_NEG
+
+
+label WHILE_START
+push static 2       //push onto stack
+push constant 0     //push onto stack
+eq                  //compare if ram[18] is equal to 0
+if-goto WHILE_END
+
+push static 1
+push local 0
+add
+pop local 0
+
+
+
+push static 2       //push ram[18] into stack
+push constant 1     //push decrementer
+sub                 //decrement ram[18] which is 3 until 0
+pop static 2        //put as new val
+
+goto WHILE_START
+
+label WHILE_END
+
+
+push static 0
+push constant 0
+lt
+if-goto FLIP
+goto END
+
+label FLIP 
+push local 0
+neg
+pop local 0
+
+
 
 
 

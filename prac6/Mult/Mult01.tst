@@ -1,6 +1,6 @@
-load Abs.vm,
-output-file Abs02.out,
-compare-to Abs02.cmp,
+load Mult.vm,
+output-file Mult01.out,
+compare-to Mult01.cmp,
 output-list sp%D1.6.1 local%D1.6.1 argument%D1.8.1 this%D1.6.1 that%D1.6.1
             RAM[16]%D1.6.1 RAM[17]%D1.6.1 RAM[18]%D1.6.1
             local[0]%D1.8.1 local[1]%D1.8.1 local[2]%D1.8.1
@@ -12,19 +12,19 @@ set argument 400,
 set this 3000,
 set that 3010,
 
-set RAM[16] 0,
-set RAM[17] -2,
-set RAM[18] -3,
+set RAM[16] -2,
+set RAM[17] 10,
+set RAM[18] 0,
 
-set local[0] -10,
-set local[1] -20,
-set local[2] -30,
+set local[0] 1,
+set local[1] 2,
+set local[2] 3,
 
-set argument[0] -100,
-set argument[1] -200,
-set argument[2] -300;
+set argument[0] 100,
+set argument[1] 200,
+set argument[2] 300;
 
-repeat 20{
+repeat 200{
     vmstep;
 }
 output;
