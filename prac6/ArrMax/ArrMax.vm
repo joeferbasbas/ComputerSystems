@@ -1,65 +1,16 @@
-// Function to find the maximum value in an array
+// Contains a function ArrMax.arrMax that finds and returns the largest element in the array a of length b.
+// a & b are both supplied as arguments
+
+// Put your code here.
+
 function ArrMax.arrMax 0
 
-// Set base address of the array (argument 0)
-push argument 0           // Push the base address of the array (m)
-pop local 0               // Store it in local 0 (base address of the array)
+push argument 0
+pop pointer 1
 
-// Load n (number of elements in the array)
-push argument 1           // Push n (number of elements)
-pop local 1               // Store n in local 1 (size of the array)
+push argument 1
+pop local 0
 
-// Initialize max with the first element of the array (base address + 0)
-push local 0              // Push base address
-push constant 0           // Offset 0
-add                       // base address + 0
-pop pointer 1             // Set THAT to base address + 0
-push that 0               // Push THAT[0] (first element of the array)
-pop local 2               // Store first element in local 2 (max)
+push that 0
+pop local 1
 
-// Initialize loop counter i = 1
-push constant 1
-pop local 3               // i = 1
-
-// Start of loop
-label LOOP_START
-
-// Check if i >= n, exit loop if true
-push local 3              // Push i
-push local 1              // Push n (number of elements)
-gt                        // If i >= n, exit loop
-if-goto LOOP_END
-
-// Access the current element of the array (base address + i)
-push local 0              // Push base address
-push local 3              // Push i (index)
-add                       // base address + i -> address of array[i]
-pop pointer 1             // Set THAT to base address + i
-push that 0               // Push THAT[0] (current array element)
-
-// Compare current element with max
-push local 2              // Push max
-gt                        // Check if array[i] > max
-if-goto UPDATE_MAX        // If true, update max
-
-// Increment i and continue loop
-push local 3
-push constant 1
-add
-pop local 3
-goto LOOP_START
-
-// Update max if current element is greater
-label UPDATE_MAX
-push that 0               // Push current element
-pop local 2               // Store it as the new max
-
-// Continue loop
-goto LOOP_START
-
-// End of loop
-label LOOP_END
-
-// Push the final max value
-push local 2              // Push the max value
-return                    // Return the max value
