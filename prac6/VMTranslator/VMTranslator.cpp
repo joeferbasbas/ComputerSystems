@@ -1,21 +1,20 @@
 #include <string>
-
+#include <iostream>
 #include "VMTranslator.h"
-
 using namespace std;
 
 /**
  * VMTranslator constructor
  */
 VMTranslator::VMTranslator() {
-    // Your code here
+    cout << "VMTranslator initialized" << endl;
 }
 
 /**
  * VMTranslator destructor
  */
 VMTranslator::~VMTranslator() {
-    // Your code here
+    cout << "VMTranslator destroyed" << endl;
 }
 
 /** Generate Hack Assembly code for a VM push operation */
@@ -132,12 +131,68 @@ string VMTranslator::vm_eq(){
 
 /** Generate Hack Assembly code for a VM gt operation */
 string VMTranslator::vm_gt(){
-    return "";
+    static int eq_label_counter = 0;
+    string label = "EQ_TRUE_" + to_string(eq_label_counter++);
+    string end_label = "EQ_END_" + to_string(eq_label_counter);
+
+    string assembly;
+    assembly += "@SP\n";
+    assembly += "AM=M-1\n";        // SP--, A = RAM[SP]
+    assembly += "D=M\n";           // D = RAM[SP]
+    assembly += "@SP\n";
+    assembly += "AM=M-1\n";        // SP--, A = RAM[SP-1]
+    assembly += "D=M-D\n";         // Subtract (first - second)
+    assembly += "@"+label+"\n";    // Jump to true label if D == 0
+    assembly += "D;JGT\n";
+    assembly += "@SP\n";
+    assembly += "A=M\n";
+    assembly += "M=0\n";           // False (set to 0)
+    assembly += "@"+end_label+"\n";
+    assembly += "0;JMP\n";         // Unconditional jump to end
+
+    assembly += "("+label+")\n";
+    assembly += "@SP\n";
+    assembly += "A=M\n";
+    assembly += "M=-1\n";          // True (set to -1)
+    
+    assembly += "("+end_label+")\n";
+    assembly += "@SP\n";
+    assembly += "M=M+1\n";         // SP++
+
+    return assembly;
 }
 
 /** Generate Hack Assembly code for a VM lt operation */
 string VMTranslator::vm_lt(){
-    return "";
+    static int eq_label_counter = 0;
+    string label = "EQ_TRUE_" + to_string(eq_label_counter++);
+    string end_label = "EQ_END_" + to_string(eq_label_counter);
+
+    string assembly;
+    assembly += "@SP\n";
+    assembly += "AM=M-1\n";        // SP--, A = RAM[SP]
+    assembly += "D=M\n";           // D = RAM[SP]
+    assembly += "@SP\n";
+    assembly += "AM=M-1\n";        // SP--, A = RAM[SP-1]
+    assembly += "D=M-D\n";         // Subtract (first - second)
+    assembly += "@"+label+"\n";    // Jump to true label if D == 0
+    assembly += "D;JLT\n";
+    assembly += "@SP\n";
+    assembly += "A=M\n";
+    assembly += "M=0\n";           // False (set to 0)
+    assembly += "@"+end_label+"\n";
+    assembly += "0;JMP\n";         // Unconditional jump to end
+
+    assembly += "("+label+")\n";
+    assembly += "@SP\n";
+    assembly += "A=M\n";
+    assembly += "M=-1\n";          // True (set to -1)
+    
+    assembly += "("+end_label+")\n";
+    assembly += "@SP\n";
+    assembly += "M=M+1\n";         // SP++
+
+    return assembly;
 }
 
 /** Generate Hack Assembly code for a VM and operation */
