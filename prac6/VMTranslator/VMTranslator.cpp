@@ -1,20 +1,21 @@
 #include <string>
-#include <iostream>
+
 #include "VMTranslator.h"
+
 using namespace std;
 
 /**
  * VMTranslator constructor
  */
 VMTranslator::VMTranslator() {
-    cout << "VMTranslator initialized" << endl;
+    // Your code here
 }
 
 /**
  * VMTranslator destructor
  */
 VMTranslator::~VMTranslator() {
-    cout << "VMTranslator destroyed" << endl;
+    // Your code here
 }
 
 /** Generate Hack Assembly code for a VM push operation */
