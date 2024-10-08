@@ -22,7 +22,7 @@ VMTranslator::~VMTranslator() {
 string VMTranslator::vm_push(string segment, int offset){
     string assembly = "";
         if (segment == "static"){
-            assembly = assembly + "@16\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M\n";
+            assembly = assembly + "@Static." + to_string(offset) + "D=M\n";
         }
         else if (segment == "local"){
             assembly = assembly + "@LCL\n" + "D=M\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
