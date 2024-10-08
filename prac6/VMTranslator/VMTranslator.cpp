@@ -59,7 +59,7 @@ string VMTranslator::vm_push(string segment, int offset) {
 
 /** Generate Hack Assembly code for a VM pop operation */
 string VMTranslator::vm_pop(string segment, int offset){    
-     string assembly;
+     string assembly = "";
 
     if (segment == "local") {
         assembly += "@LCL\n";                    // Base address of local
