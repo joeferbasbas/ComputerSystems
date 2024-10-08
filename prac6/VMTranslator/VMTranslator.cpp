@@ -25,19 +25,27 @@ string VMTranslator::vm_push(string segment, int offset){
             assembly = assembly + "@16\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M\n";
         }
         else if (segment == "local"){
-            assembly = assembly + "@LCL\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+            assembly = assembly + "@LCL\n" + "D=M\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
         }
         else if (segment == "argument"){
-            assembly = assembly + "@ARG\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+            assembly = assembly + "@ARG\n" + "D=M\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
         }
         else if (segment == "this"){
-            assembly = assembly + "@THIS\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+            assembly = assembly + "@THIS\n" + "D=M\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
         }
         else if (segment == "that"){
-            assembly = assembly + "@THAT\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+            assembly = assembly + "@THAT\n" + "D=M\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
         }
         else if (segment == "temp"){
-            assembly = assembly + "@TEMP\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+            assembly = assembly + "@5\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+        }
+        else if (segment == "pointer"){
+            if(offset == 0){
+                assembly = assembly + "@THIS\n" + "D=M\n";
+            }
+            else if(offset == 1){
+                assembly = assembly + "@THAT\n" + "D=M\n";
+            }
         }
         else if (segment == "constant"){
             assembly = assembly + "@" + to_string(offset) + "\n" + "D=A";
