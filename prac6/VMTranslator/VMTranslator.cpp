@@ -20,28 +20,29 @@ VMTranslator::~VMTranslator() {
 
 /** Generate Hack Assembly code for a VM push operation */
 string VMTranslator::vm_push(string segment, int offset){
-    string assembly;
-
-    if (segment == "constant") {
-        assembly += "@"+to_string(offset)+"\n";  // Load the constant into A
-        assembly += "D=A\n";                     // D = constant
-    } else if (segment == "local") {
-        assembly += "@LCL\n";                    // Base address of local
-        assembly += "D=M\n";                     // D = RAM[LCL]
-        assembly += "@"+to_string(offset)+"\n";  // Offset
-        assembly += "A=D+A\n";                   // A = RAM[LCL] + offset
-        assembly += "D=M\n";                     // D = RAM[RAM[LCL] + offset]
-    }
-    // Implement other segments (argument, this, that, temp, pointer, static)
-    
-    // Push to stack
-    assembly += "@SP\n";                         // Load SP address
-    assembly += "A=M\n";                         // A = RAM[SP] (top of the stack)
-    assembly += "M=D\n";                         // RAM[SP] = D
-    assembly += "@SP\n";                         // Increment SP
-    assembly += "M=M+1\n";
-
-    return assembly;
+    string assembly = "";
+        if (segment == "static"){
+            assembly = assembly + "@16\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M\n";
+        }
+        else if (segment == "local"){
+            assembly = assembly + "@LCL\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+        }
+        else if (segment == "argument"){
+            assembly = assembly + "@ARG\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+        }
+        else if (segment == "this"){
+            assembly = assembly + "@THIS\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+        }
+        else if (segment == "that"){
+            assembly = assembly + "@THAT\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+        }
+        else if (segment == "temp"){
+            assembly = assembly + "@TEMP\n" + "D=A\n" + "@" + to_string(offset) + "\n" + "A=D+A\n" + "D=M";
+        }
+        else if (segment == "constant"){
+            assembly = assembly + "@" + to_string(offset) + "\n" + "D=A";
+        }
+    return assembly + "@SP\n" + "AM=M+1\n" + "A=A-1\n" + "M=D\n";
 }
 
 /** Generate Hack Assembly code for a VM pop operation */
@@ -198,7 +199,7 @@ string VMTranslator::vm_lt(){
 
 /** Generate Hack Assembly code for a VM and operation */
 string VMTranslator::vm_and(){
-    return "";
+    
 }
 
 /** Generate Hack Assembly code for a VM or operation */
