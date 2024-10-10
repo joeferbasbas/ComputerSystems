@@ -103,7 +103,7 @@ string VMTranslator::vm_pop(string segment, int offset){
     }
     else if(segment == "pointer"){
         if(offset == 0){
-            assembly += "@THIS\n";               /
+            assembly += "@THIS\n";               
             assembly += "D=A\n";  
         }
         else if(offset == 1){
