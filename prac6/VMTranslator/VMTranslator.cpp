@@ -62,14 +62,59 @@ string VMTranslator::vm_pop(string segment, int offset){
      string assembly = "";
 
     if (segment == "local") {
-        assembly += "@LCL\n";                    // Base address of local
-        assembly += "D=M\n";                     // D = RAM[LCL]
-        assembly += "@"+to_string(offset)+"\n";  // Offset
-        assembly += "D=D+A\n";                   // D = RAM[LCL] + offset
-        assembly += "@R13\n";                    // Use R13 as a temp register
-        assembly += "M=D\n";                     // R13 = RAM[LCL] + offset
+        assembly += "@LCL\n";                    
+        assembly += "D=M\n";                     
+        assembly += "@"+to_string(offset)+"\n";  
+        assembly += "D=D+A\n";                   
+        assembly += "@R13\n";                    
+        assembly += "M=D\n";                     
     }
-    // Implement other segments (argument, this, that, temp, pointer, static)
+    else if(segment == "argmuent"){
+        assembly += "@ARG\n";                    
+        assembly += "D=M\n";                     
+        assembly += "@"+to_string(offset)+"\n";  
+        assembly += "D=D+A\n";                   
+        assembly += "@R13\n";                  
+        assembly += "M=D\n";  
+    }
+    else if(segment == "this"){
+        assembly += "@THIS\n";                   
+        assembly += "D=M\n";                     
+        assembly += "@"+to_string(offset)+"\n";  
+        assembly += "D=D+A\n";                   
+        assembly += "@R13\n";                    
+        assembly += "M=D\n";  
+    }
+    else if(segment == "that"){
+        assembly += "@THAT\n";                    
+        assembly += "D=M\n";                     
+        assembly += "@"+to_string(offset)+"\n";  
+        assembly += "D=D+A\n";                   
+        assembly += "@R13\n";                    
+        assembly += "M=D\n";  
+    }
+    else if(segment == "temp"){
+        assembly += "@5\n";                    
+        assembly += "D=M\n";                    
+        assembly += "@"+to_string(offset)+"\n";  
+        assembly += "D=D+A\n";                   
+        assembly += "@R13\n";                    
+        assembly += "M=D\n";  
+    }
+    else if(segment == "pointer"){
+        if(offset == 0){
+            assembly += "@THIS\n";               /
+            assembly += "D=A\n";  
+        }
+        else if(offset == 1){
+            assembly += "@THAT\n";               
+            assembly += "D=A\n";  
+        }
+    }
+    else if(segment == "static"){
+
+    }
+    
 
     // Pop from stack
     assembly += "@SP\n";                         // Load SP address
