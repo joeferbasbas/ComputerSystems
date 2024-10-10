@@ -108,11 +108,16 @@ string VMTranslator::vm_pop(string segment, int offset){
         }
         else if(offset == 1){
             assembly += "@THAT\n";               
-            assembly += "D=A\n";  
+            assembly += "M=D\n";  
         }
     }
     else if(segment == "static"){
-
+        assembly += "@Static.\n" + to_string(offset) + "\n";                    
+        assembly += "D=M\n";                    
+        assembly += "@13\n";  
+        assembly += "D=D+A\n";                   
+        assembly += "@R13\n";                    
+        assembly += "M=D\n";  
     }
     
 
