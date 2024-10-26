@@ -38,7 +38,6 @@ class CompilerParser :
         self.mustBe("symbol", "}")
 
         print("Class parsing completed.")
-        # Create a ParseTree node for the class with braces included in the format
         classTree = ParseTree("class", f"{classNameToken.getValue()} {{ }}")
         
         return classTree
@@ -136,7 +135,26 @@ class CompilerParser :
         Generates a parse tree for a subroutine's body
         @return a ParseTree that represents a subroutine's body
         """
-        return None 
+        print("Parsing subroutine body...")
+        bodyTree = ParseTree("subroutineBody", "")
+
+        self.mustBe("symbol", "{")  # Assuming subroutine body starts with '{'
+        
+        while self.current().getValue() != "}":
+            if self.current().getValue() == "var":
+                bodyTree.addChild(self.compileVarDec())
+            elif self.current().getValue() == "if":
+                bodyTree.addChild(self.compileIf())
+            elif self.current().getValue() == "while":
+                bodyTree.addChild(self.compileWhile())
+            # Add more statement types as necessary
+            else:
+                # Simple handling for unrecognized or end statements (e.g., break, return)
+                self.next()  # Skip or simple parse of other types of statements
+                
+        self.mustBe("symbol", "}")  # End of subroutine body
+
+        return bodyTree
     
     
     def compileVarDec(self):
@@ -144,7 +162,30 @@ class CompilerParser :
         Generates a parse tree for a variable declaration
         @return a ParseTree that represents a var declaration
         """
-        return None 
+        print("Parsing variable declaration...")
+        varDecTree = ParseTree("variableDeclaration", "")
+        
+        # Assume the 'var' keyword has already been identified if this method is called
+        self.mustBe("keyword", "var")
+        
+        typeToken = self.mustBe("identifier", None)  # Type of the variable(s)
+        varDecTree.addChild(ParseTree("type", typeToken.getValue()))
+        
+        # Handle one or more variable names separated by commas
+        while True:
+            varNameToken = self.mustBe("identifier", None)
+            varDecTree.addChild(ParseTree("varName", varNameToken.getValue()))
+            
+            # Check if there is a comma, indicating more variables
+            if self.current().getValue() == ",":
+                self.next()
+            elif self.current().getValue() == ";":
+                self.next()
+                break  # End of variable declaration
+            else:
+                raise ParseException("Expected ',' or ';', but found " + self.current().getValue())
+
+        return varDecTree 
     
 
     def compileStatements(self):
@@ -353,3 +394,37 @@ if __name__ == "__main__":
         except ParseException as e:
             print(f"{case['description']}: FAILED")
             print(f"Error: {e}")
+
+
+    tests = [
+        {
+            "description": "Subroutine body with one variable declaration",
+            "tokens": [
+                Token("symbol", "{"),
+                Token("keyword", "var"),
+                Token("identifier", "int"),
+                Token("identifier", "x"),
+                Token("symbol", ";"),
+                Token("symbol", "}")
+            ]
+        },
+        {
+            "description": "Variable declaration missing semicolon",
+            "tokens": [
+                Token("keyword", "var"),
+                Token("identifier", "int"),
+                Token("identifier", "y")
+            ]
+        }
+    ]
+
+    for test in tests:
+        parser = CompilerParser(test['tokens'])
+        try:
+            if test['description'].startswith("Subroutine"):
+                result = parser.compileSubroutineBody()
+            else:
+                result = parser.compileVarDec()
+            print(f"Test '{test['description']}' passed. Result: {result}")
+        except Exception as e:
+            print(f"Test '{test['description']}' failed with an error: {str(e)}")
