@@ -52,7 +52,33 @@ class CompilerParser :
         Generates a parse tree for a static variable declaration or field declaration
         @return a ParseTree that represents a static variable declaration or field declaration
         """
-        return None 
+        if not (self.have("keyword", "static") or self.have("keyword", "field")):
+            raise ParseException(f"Expected 'static' or 'field', found {self.current().getType()} {self.current().getValue()}")
+
+
+        declarationType = self.current().getValue()
+        declarationTree = ParseTree(declarationType, "")
+        self.next()
+
+        typeToken = self.mustBe("identifier", None)
+        declarationTree.addChild(ParseTree('type', typeToken.getValue()))
+
+        while True:
+            varNameToken = self.mustBe("identifier", None)
+            declarationTree.addChild(ParseTree("varName", varNameToken.getValue()))
+            
+            self.next()
+            if self.current().getValue() == ';':
+                self.next()
+                break
+            elif self.current().getValue() == ',':
+                self.next()
+            else:
+                raise ParseException("expected , or ; but found " + self.current().getValue())
+        return declarationTree
+
+
+      
     
 
     def compileSubroutine(self):
@@ -198,12 +224,11 @@ class CompilerParser :
         If so, advance to the next token, returning the current token, otherwise throw/raise a ParseException.
         @return token that was current prior to advancing.
         """
-        currToken = self.current()
-        if self.have(expectedType, expectedValue):
-            self.next()
-            return currToken
-        else:
-            raise ParseException(f"Expected {expectedType} {expectedValue}, but found {currToken.getType()} {currToken.getValue()}")
+        if not self.have(expectedType, expectedValue):
+            currToken = self.current()
+            raise ParseException(f"Expected {expectedType} '{expectedValue}', but found {currToken.getType()} '{currToken.getValue()}'")
+        self.next()
+        return self.current()
 
 if __name__ == "__main__":
 
@@ -214,15 +239,36 @@ if __name__ == "__main__":
         
         }
     """
-    tokens = []
-    tokens.append(Token("keyword","class"))
-    tokens.append(Token("identifier","MyClass"))
-    tokens.append(Token("symbol","{"))
-    tokens.append(Token("symbol","}"))
+    # tokens = []
+    # tokens.append(Token("keyword","class"))
+    # tokens.append(Token("identifier","MyClass"))
+    # tokens.append(Token("symbol","{"))
+    # tokens.append(Token("symbol","}"))
 
-    parser = CompilerParser(tokens)
-    try:
-        result = parser.compileProgram()
-        print(result)
-    except ParseException as e:
-        print(f"Error Parsing: {e}")
+    # parser = CompilerParser(tokens)
+
+    
+
+
+    # try:
+    #     result = parser.compileProgram()
+    #     print(result)
+    # except ParseException as e:
+    #     print(f"Error Parsing: {e}")
+
+
+    test_cases = [
+    Token("keyword", "static"),
+    Token("identifier", "int"),
+    Token("identifier", "myVar"),
+    Token("symbol", ";")
+]
+
+varDecParser = CompilerParser(test_cases)
+try:
+    var_declaration = varDecParser.compileClassVarDec()
+    print("Parsed Variable Declaration:")
+    print(var_declaration)
+except ParseException as e:
+    print(f'Error parsing: {e}')
+
