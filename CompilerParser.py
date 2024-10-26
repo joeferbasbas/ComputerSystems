@@ -39,7 +39,7 @@ class CompilerParser :
 
         print("Class parsing completed.")
         # Create a ParseTree node for the class with braces included in the format
-        classTree = ParseTree("class", f"{classNameToken.getValue()} {{}}")
+        classTree = ParseTree("class", f"{classNameToken.getValue()} {{ }}")
         
         return classTree
 
