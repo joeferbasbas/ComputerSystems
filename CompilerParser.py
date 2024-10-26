@@ -38,7 +38,6 @@ class CompilerParser :
         print("Checking for opening '{'...")
         self.mustBe("symbol", "{")
         
-        # Here you might add code to handle class body
         print("Checking for closing '}'...")
         self.mustBe("symbol", "}")
 
@@ -202,7 +201,7 @@ class CompilerParser :
         if self.position < len(self.tokens):
             return self.tokens[self.position]
         else:
-            raise ParseException("No more token to parse")
+            raise ParseException("No more token to parse at current retrieval")
 
 
     def have(self,expectedType,expectedValue):
@@ -224,11 +223,11 @@ class CompilerParser :
         If so, advance to the next token, returning the current token, otherwise throw/raise a ParseException.
         @return token that was current prior to advancing.
         """
+        currToken = self.current()  # Get the current token
         if not self.have(expectedType, expectedValue):
-            currToken = self.current()
             raise ParseException(f"Expected {expectedType} '{expectedValue}', but found {currToken.getType()} '{currToken.getValue()}'")
-        self.next()
-        return self.current()
+        self.next()  # Only advance if the check passes
+        return currToken
 
 if __name__ == "__main__":
 
@@ -239,22 +238,22 @@ if __name__ == "__main__":
         
         }
     """
-    # tokens = []
-    # tokens.append(Token("keyword","class"))
-    # tokens.append(Token("identifier","MyClass"))
-    # tokens.append(Token("symbol","{"))
-    # tokens.append(Token("symbol","}"))
+    tokens = []
+    tokens.append(Token("keyword","class"))
+    tokens.append(Token("identifier","MyClass"))
+    tokens.append(Token("symbol","{"))
+    tokens.append(Token("symbol","}"))
 
-    # parser = CompilerParser(tokens)
+    parser = CompilerParser(tokens)
 
     
 
 
-    # try:
-    #     result = parser.compileProgram()
-    #     print(result)
-    # except ParseException as e:
-    #     print(f"Error Parsing: {e}")
+    try:
+        result = parser.compileProgram()
+        print(result)
+    except ParseException as e:
+        print(f"Error Parsing: {e}")
 
 
     test_cases = []
