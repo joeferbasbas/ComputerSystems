@@ -57,10 +57,16 @@ class ParseTree():
         Generate a string from this ParseTree
         @return A printable representation of this ParseTree with indentation
         """              
-        indent = "  │ " * depth  # Uniform indentation using the depth parameter
-        output = indent + self.node_type + (" " + self.value if self.value else "") + "\n"
+        indent = "  " * depth
+        if isinstance(self.value, dict):
+            # Handle dictionary by converting to a string properly
+            value_str = ", ".join(f"{k}: {v}" for k, v in self.value.items())
+        else:
+            value_str = self.value
+        
+        output = indent + self.node_type + " " + value_str + "\n"
         for child in self.children:
-            output += child.__str__(depth + 1)  # Recursively print each child with increased depth
+            output += child.__str__(depth + 1)
         return output
 
     

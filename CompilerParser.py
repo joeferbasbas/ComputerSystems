@@ -79,7 +79,33 @@ class CompilerParser :
         Generates a parse tree for a method, function, or constructor
         @return a ParseTree that represents the method, function, or constructor
         """
-        return None 
+        subroutineTypeToken = self.current()
+        self.next()  # Move past the type keyword
+
+        if subroutineTypeToken.getValue() == "constructor":
+            # Constructor name, usually the same as the class name
+            constructorNameToken = self.mustBe("identifier", None)
+            self.mustBe("symbol", "(")  # Now expect the '('
+        else:
+            returnTypeToken = self.mustBe("identifier", None)
+            subroutineNameToken = self.mustBe("identifier", None)
+            self.mustBe("symbol", "(")
+
+        # Process parameters
+        parameters = self.compileParameterList()
+        self.mustBe("symbol", ")")
+
+        # Subroutine body assumed to be enclosed with '{' and '}'
+        self.mustBe("symbol", "{")
+        # Process the body here (not implemented)
+        self.mustBe("symbol", "}")
+
+        return ParseTree("subroutine", {
+            "type": subroutineTypeToken.getValue(),
+            "name": constructorNameToken.getValue() if subroutineTypeToken.getValue() == "constructor" else subroutineNameToken.getValue(),
+            "parameters": parameters,
+            # Body would be added here
+        })
     
     
     def compileParameterList(self):
@@ -87,7 +113,27 @@ class CompilerParser :
         Generates a parse tree for a subroutine's parameters
         @return a ParseTree that represents a subroutine's parameters
         """
-        return None 
+        paramListTree = ParseTree("parameterList", "")
+    
+        # Check if the next token is ')' which means the parameter list is empty
+        if self.current().getValue() == ")":
+            return paramListTree  # Return empty parameter list
+
+        while True:
+            # Expect type identifier
+            typeToken = self.mustBe("identifier", None)
+            # Expect parameter name identifier
+            paramNameToken = self.mustBe("identifier", None)
+            
+            paramListTree.addChild(ParseTree("parameter", typeToken.getValue() + " " + paramNameToken.getValue()))
+            
+            # If the next token is ',', there are more parameters
+            if self.current().getValue() == ",":
+                self.next()  # Move past the comma to the next parameter
+            else:
+                break  # Exit the loop if there's no comma
+
+        return paramListTree 
     
     
     def compileSubroutineBody(self):
@@ -265,3 +311,50 @@ if __name__ == "__main__":
     except ParseException as e:
         print(f'Error parsing: {e}')
 
+
+
+    test_cases = [
+        {
+            'description': 'Valid function with parameters',
+            'tokens': [
+                Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "sum"),
+                Token("symbol", "("), Token("identifier", "int"), Token("identifier", "a"),
+                Token("symbol", ","), Token("identifier", "int"), Token("identifier", "b"),
+                Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
+            ]
+        },
+        {
+            'description': 'Valid method with no parameters',
+            'tokens': [
+                Token("keyword", "method"), Token("identifier", "void"), Token("identifier", "display"),
+                Token("symbol", "("), Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
+            ]
+        },
+        {
+            'description': 'Constructor with parameters',
+            'tokens': [
+                Token("keyword", "constructor"), Token("identifier", "Main"), Token("identifier", "Main"),
+                Token("symbol", "("), Token("identifier", "int"), Token("identifier", "size"),
+                Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
+            ]
+        },
+        {
+            'description': 'Invalid subroutine (missing closing brace)',
+            'tokens': [
+                Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "broken"),
+                Token("symbol", "("), Token("identifier", "int"), Token("identifier", "param"),
+                Token("symbol", ")"), Token("symbol", "{")
+            ]  # Missing closing '}' to simulate an error case.
+        }
+    ]
+
+    for case in test_cases:
+        parser = CompilerParser(case['tokens'])
+        try:
+            result = parser.compileSubroutine()
+            print(f"{case['description']}: PASSED")
+            print("Resulting Parse Tree:")
+            print(result)
+        except ParseException as e:
+            print(f"{case['description']}: FAILED")
+            print(f"Error: {e}")
