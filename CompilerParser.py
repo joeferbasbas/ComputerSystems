@@ -33,7 +33,10 @@ class CompilerParser :
         
         print(f"Class name obtained: {classNameToken.getValue()}")
         classTree = ParseTree("class", classNameToken.getValue())
-        self.mustBe("symbol", "{")
+        
+        print("Checking for opening '{'...")
+        openBraceToken = self.mustBe("symbol", "{")
+        classTree.addChild(ParseTree("openingBrace", openBraceToken.getValue()))
         
         print("Parsing class body...")
         while self.current().getValue() != "}":
@@ -43,9 +46,12 @@ class CompilerParser :
                 raise ParseException(f"Unhandled token in class body: {self.current().getType()} {self.current().getValue()}")
         
         print("Checking for closing '}'...")
-        self.mustBe("symbol", "}")
+        closeBraceToken = self.mustBe("symbol", "}")
+        classTree.addChild(ParseTree("closingBrace", closeBraceToken.getValue()))
+        
         print("Class parsing completed.")
         return classTree
+
 
     
 
