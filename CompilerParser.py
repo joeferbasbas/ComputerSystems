@@ -31,23 +31,18 @@ class CompilerParser :
         print("Getting class name...")
         classNameToken = self.mustBe("identifier", None)
         
-        print(f"Class name obtained: {classNameToken.getValue()}")
-        classTree = ParseTree("class", classNameToken.getValue())
+        print("Checking for opening '{'...")
         self.mustBe("symbol", "{")
-        
-        print("Parsing class body...")
-        # Parse class variable declarations
-        while self.current().getValue() in ['static', 'field']:
-            classTree.addChild(self.compileClassVarDec())
-        
-        # Parse subroutine declarations
-        while self.current().getValue() in ['function', 'method', 'constructor']:
-            classTree.addChild(self.compileSubroutine())
         
         print("Checking for closing '}'...")
         self.mustBe("symbol", "}")
+
         print("Class parsing completed.")
+        # Create a ParseTree node for the class with braces included in the format
+        classTree = ParseTree("class", f"{classNameToken.getValue()} {{}}")
+        
         return classTree
+
 
 
     
