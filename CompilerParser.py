@@ -31,16 +31,28 @@ class CompilerParser :
         print("Getting class name...")
         classNameToken = self.mustBe("identifier", None)
         
+        # Create class node with the class name
+        classTree = ParseTree("class", classNameToken.getValue())
+
         print("Checking for opening '{'...")
-        self.mustBe("symbol", "{")
-        
+        openBraceToken = self.mustBe("symbol", "{")
+        classTree.addChild(ParseTree("symbol", openBraceToken.getValue()))
+
+        print("Parsing class body...")
+        # Assume compileClassVarDec() is implemented to handle variable declarations
+        while self.current().getValue() != "}":
+            if self.current().getValue() == "static":  # or other conditions based on variable declarations
+                classTree.addChild(self.compileClassVarDec())
+            else:
+                self.next()  # This is a simplification, adjust based on actual content handling
+
         print("Checking for closing '}'...")
-        self.mustBe("symbol", "}")
+        closeBraceToken = self.mustBe("symbol", "}")
+        classTree.addChild(ParseTree("symbol", closeBraceToken.getValue()))
 
         print("Class parsing completed.")
-        classTree = ParseTree("class", f"{classNameToken.getValue()} {{ }}")
-        
         return classTree
+
 
 
 
