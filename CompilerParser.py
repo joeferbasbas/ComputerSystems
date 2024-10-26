@@ -205,7 +205,19 @@ class CompilerParser :
         Generates a parse tree for a series of statements
         @return a ParseTree that represents the series of statements
         """
-        return None 
+        statements = ParseTree("statements", "")
+        while self.current().getValue() not in ["}", "else"]:  # Adjust as needed for your language
+            if self.current().getValue() == "let":
+                statements.addChild(self.compileLet())
+            elif self.current().getValue() == "if":
+                statements.addChild(self.compileIf())
+            elif self.current().getValue() == "while":
+                statements.addChild(self.compileWhile())
+            elif self.current().getValue() == "do":
+                statements.addChild(self.compileDo())
+            else:
+                self.next()  # Skip tokens that don't start a statement
+        return statements
     
     
     def compileLet(self):
@@ -213,7 +225,16 @@ class CompilerParser :
         Generates a parse tree for a let statement
         @return a ParseTree that represents the statement
         """
-        return None 
+        self.mustBe("keyword", "let")
+        varName = self.mustBe("identifier", None)
+        letTree = ParseTree("letStatement", varName.getValue())
+
+        if self.current().getValue() == "=":
+            self.next()  # Skip over the '=' symbol
+            letTree.addChild(self.compileExpression())  # Parse the expression that represents the new value
+            self.mustBe("symbol", ";")  # Expect a semicolon at the end of the statement
+
+        return letTree
 
 
     def compileIf(self):
@@ -221,7 +242,26 @@ class CompilerParser :
         Generates a parse tree for an if statement
         @return a ParseTree that represents the statement
         """
-        return None 
+        self.mustBe("keyword", "if")
+        self.mustBe("symbol", "(")
+        condition = self.compileExpression()  # Assuming compileExpression() is implemented
+        self.mustBe("symbol", ")")
+
+        self.mustBe("symbol", "{")
+        ifBody = self.compileStatements()
+        self.mustBe("symbol", "}")
+
+        ifTree = ParseTree("ifStatement", condition)
+        ifTree.addChild(ifBody)
+
+        if self.current().getValue() == "else":
+            self.next()
+            self.mustBe("symbol", "{")
+            elseBody = self.compileStatements()
+            self.mustBe("symbol", "}")
+            ifTree.addChild(elseBody)
+
+        return ifTree
 
     
     def compileWhile(self):
@@ -229,7 +269,18 @@ class CompilerParser :
         Generates a parse tree for a while statement
         @return a ParseTree that represents the statement
         """
-        return None 
+        self.mustBe("keyword", "while")
+        self.mustBe("symbol", "(")
+        condition = self.compileExpression()
+        self.mustBe("symbol", ")")
+
+        self.mustBe("symbol", "{")
+        whileBody = self.compileStatements()
+        self.mustBe("symbol", "}")
+
+        whileTree = ParseTree("whileStatement", condition)
+        whileTree.addChild(whileBody)
+        return whileTree
 
 
     def compileDo(self):
@@ -237,7 +288,17 @@ class CompilerParser :
         Generates a parse tree for a do statement
         @return a ParseTree that represents the statement
         """
-        return None 
+        self.mustBe("keyword", "do")
+        methodName = self.mustBe("identifier", None)  # Assuming simple case; adjust for method calls
+        self.mustBe("symbol", "(")
+        # Assuming compileExpressionList() handles the list of expressions for arguments
+        argumentList = self.compileExpressionList()  
+        self.mustBe("symbol", ")")
+        self.mustBe("symbol", ";")
+
+        doTree = ParseTree("doStatement", methodName.getValue())
+        doTree.addChild(argumentList)
+        return doTree
 
 
     def compileReturn(self):
