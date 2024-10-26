@@ -32,15 +32,18 @@ class CompilerParser :
         classNameToken = self.mustBe("identifier", None)
         
         print(f"Class name obtained: {classNameToken.getValue()}")
-        classTree = ParseTree("class", "") 
-        classTree.addChild(ParseTree("identifier", classNameToken.getValue()))
-        
-        print("Checking for opening '{'...")
+        classTree = ParseTree("class", classNameToken.getValue())
         self.mustBe("symbol", "{")
+        
+        print("Parsing class body...")
+        while self.current().getValue() != "}":
+            if self.have("keyword", "static") or self.have("keyword", "field"):
+                classTree.addChild(self.compileClassVarDec())
+            else:
+                raise ParseException(f"Unhandled token in class body: {self.current().getType()} {self.current().getValue()}")
         
         print("Checking for closing '}'...")
         self.mustBe("symbol", "}")
-
         print("Class parsing completed.")
         return classTree
 
@@ -51,29 +54,17 @@ class CompilerParser :
         Generates a parse tree for a static variable declaration or field declaration
         @return a ParseTree that represents a static variable declaration or field declaration
         """
-        if not (self.have("keyword", "static") or self.have("keyword", "field")):
-            raise ParseException(f"Expected 'static' or 'field', found {self.current().getType()} {self.current().getValue()}")
-
-
-        declarationType = self.current().getValue()
-        declarationTree = ParseTree(declarationType, "")
-        self.next()
-
-        typeToken = self.mustBe("identifier", None)
-        declarationTree.addChild(ParseTree('type', typeToken.getValue()))
-
-        while True:
-            varNameToken = self.mustBe("identifier", None)
-            declarationTree.addChild(ParseTree("varName", varNameToken.getValue()))
-            
-            self.next()
-            if self.current().getValue() == ';':
-                self.next()
-                break
-            elif self.current().getValue() == ',':
-                self.next()
-            else:
-                raise ParseException("expected , or ; but found " + self.current().getValue())
+        declarationType = self.current().getValue()  # Get 'static' or 'field'
+        declarationTree = ParseTree("declaration", declarationType)
+        self.next()  # Move past 'static' or 'field'
+        
+        typeToken = self.mustBe("identifier", None)  # Expect the type
+        declarationTree.addChild(ParseTree("type", typeToken.getValue()))
+        
+        varNameToken = self.mustBe("identifier", None)  # Expect the variable name
+        declarationTree.addChild(ParseTree("varName", varNameToken.getValue()))
+        
+        self.mustBe("symbol", ";")  # Expect the semicolon
         return declarationTree
 
 
