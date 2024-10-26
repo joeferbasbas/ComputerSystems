@@ -33,22 +33,19 @@ class CompilerParser :
         
         print(f"Class name obtained: {classNameToken.getValue()}")
         classTree = ParseTree("class", classNameToken.getValue())
-        
-        print("Checking for opening '{'...")
-        openBraceToken = self.mustBe("symbol", "{")
-        classTree.addChild(ParseTree("openingBrace", openBraceToken.getValue()))
+        self.mustBe("symbol", "{")
         
         print("Parsing class body...")
-        while self.current().getValue() != "}":
-            if self.have("keyword", "static") or self.have("keyword", "field"):
-                classTree.addChild(self.compileClassVarDec())
-            else:
-                raise ParseException(f"Unhandled token in class body: {self.current().getType()} {self.current().getValue()}")
+        # Parse class variable declarations
+        while self.current().getValue() in ['static', 'field']:
+            classTree.addChild(self.compileClassVarDec())
+        
+        # Parse subroutine declarations
+        while self.current().getValue() in ['function', 'method', 'constructor']:
+            classTree.addChild(self.compileSubroutine())
         
         print("Checking for closing '}'...")
-        closeBraceToken = self.mustBe("symbol", "}")
-        classTree.addChild(ParseTree("closingBrace", closeBraceToken.getValue()))
-        
+        self.mustBe("symbol", "}")
         print("Class parsing completed.")
         return classTree
 
