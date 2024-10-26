@@ -257,18 +257,18 @@ if __name__ == "__main__":
     #     print(f"Error Parsing: {e}")
 
 
-    test_cases = [
-    Token("keyword", "static"),
-    Token("identifier", "int"),
-    Token("identifier", "myVar"),
-    Token("symbol", ";")
-]
+    test_cases = []
+    test_cases.append(Token("keyword", "static"))
+    test_cases.append(Token("identifier", "int"))
+    test_cases.append(Token("identifier", "myVar"))
+    test_cases.append(Token("symbol", ";"))
+    
 
-varDecParser = CompilerParser(test_cases)
-try:
-    var_declaration = varDecParser.compileClassVarDec()
-    print("Parsed Variable Declaration:")
-    print(var_declaration)
-except ParseException as e:
-    print(f'Error parsing: {e}')
+    varDecParser = CompilerParser(test_cases)
+    try:
+        var_declaration = varDecParser.compileClassVarDec()
+        print("Parsed Variable Declaration:")
+        print(var_declaration)
+    except ParseException as e:
+        print(f'Error parsing: {e}')
 
