@@ -94,20 +94,19 @@ class CompilerParser :
         subroutineTree = ParseTree("subroutine", "")
 
         # Parse the subroutine keyword (e.g., function, constructor, method)
-        subroutineKeyword = self.mustBe("keyword", None)
+        subroutineKeyword = self.mustBe("keyword", None)  # 'constructor', 'function', 'method'
         subroutineTree.addChild(ParseTree("keyword", subroutineKeyword.getValue()))
 
-        # Parse the subroutine name (e.g., test)
-        while self.current().getType() == "identifier":
-            subroutineName = self.mustBe("identifier", None)
-            subroutineTree.addChild(ParseTree("identifier", subroutineName.getValue()))
-
-        # Parse the return type (e.g., void, int)
+        # Parse the return type: can be a keyword ('void', 'int') or an identifier (class name, e.g., 'Test')
         if self.current().getType() == "keyword":
             returnType = self.mustBe("keyword", None)
-            subroutineTree.addChild(ParseTree("returnType", returnType.getValue()))
+        else:
+            returnType = self.mustBe("identifier", None)  # For constructors and class types
+        subroutineTree.addChild(ParseTree("returnType", returnType.getValue()))
 
-        
+        # Parse the subroutine name (e.g., 'new' for constructors or other function names)
+        subroutineName = self.mustBe("identifier", None)
+        subroutineTree.addChild(ParseTree("identifier", subroutineName.getValue()))
 
         # Parse the parameter list
         self.mustBe("symbol", "(")
