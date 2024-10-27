@@ -26,20 +26,30 @@ class CompilerParser :
         @return a ParseTree that represents a class
         """
         self.mustBe("keyword", "class")
+
+        # Parse class name (identifier)
         classNameToken = self.mustBe("identifier", None)
-        classTree = ParseTree("class", classNameToken.getValue())
 
+        # Create the class parse tree node
+        classTree = ParseTree("class", None)  # No value for the class node itself
+
+        # Add class name as a child node
+        classTree.addChild(ParseTree("identifier", classNameToken.getValue()))
+
+        # Parse opening '{'
         openBracket = self.mustBe("symbol", "{")
-        classTree.addChild(ParseTree("symbol", openBracket.getValue()))
+        classTree.addChild(ParseTree("symbol", openBracket.getValue()))  # Add '{' to the parse tree
 
+        # Parse the class body (handle classVarDec)
         while self.current().getValue() != "}":
             if self.current().getType() == "keyword" and self.current().getValue() in ["static", "field"]:
                 classTree.addChild(self.compileClassVarDec())
             else:
                 self.next()
 
+        # Parse closing '}'
         closeBraceToken = self.mustBe("symbol", "}")
-        classTree.addChild(ParseTree("symbol", closeBraceToken.getValue()))
+        classTree.addChild(ParseTree("symbol", closeBraceToken.getValue()))  # Add '}' to the parse tree
 
         return classTree
 
@@ -379,38 +389,22 @@ if __name__ == "__main__":
         
         }
     """
-    # tokens = []
-    # tokens.append(Token("keyword","class"))
-    # tokens.append(Token("identifier","MyClass"))
-    # tokens.append(Token("symbol","{"))
-    # tokens.append(Token("symbol","}"))
-
-    # parser = CompilerParser(tokens)
-
-    
 
 
-    # try:
-    #     result = parser.compileProgram()
-    #     print(result)
-    # except ParseException as e:
-    #     print(f"Error Parsing: {e}")
-
-
-    # tokens1 = [
-    #     Token("keyword", "class"),
-    #     Token("identifier", "Main"),
-    #     Token("symbol", "{"),
-    #     Token("symbol", "}")
-    # ]
-    # parser1 = CompilerParser(tokens1)
-    # try:
-    #     result1 = parser1.compileProgram()
-    #     print("Test Case 1 Passed: Valid Class Parsing")
-    #     print(result1)
-    # except Exception as e:
-    #     print("Test Case 1 Failed: Valid Class Parsing")
-    #     print(str(e))
+    tokens1 = [
+        Token("keyword", "class"),
+        Token("identifier", "Main"),
+        Token("symbol", "{"),
+        Token("symbol", "}")
+    ]
+    parser1 = CompilerParser(tokens1)
+    try:
+        result1 = parser1.compileProgram()
+        print("Test Case 1 Passed: Valid Class Parsing")
+        print(result1)
+    except Exception as e:
+        print("Test Case 1 Failed: Valid Class Parsing")
+        print(str(e))
 
         
 
@@ -432,22 +426,22 @@ if __name__ == "__main__":
 
     print('\n')
 
-    tokens3 = [
-        Token("keyword", "class"),
-        Token("identifier", "Main"),
-        Token("symbol", "{"),
-        Token("keyword", "static"),
-        Token("keyword", "int"),
-        Token("identifier", "a"),
-        Token("symbol", ";"),
-        Token("symbol", "}")
-    ]
-    parser2 = CompilerParser(tokens3)
-    try:
-        result2 = parser2.compileProgram()
-        print(result2)
-    except Exception as e:
-        print("Test Case 3 Failed:", str(e))
+    # tokens3 = [
+    #     Token("keyword", "class"),
+    #     Token("identifier", "Main"),
+    #     Token("symbol", "{"),
+    #     Token("keyword", "static"),
+    #     Token("keyword", "int"),
+    #     Token("identifier", "a"),
+    #     Token("symbol", ";"),
+    #     Token("symbol", "}")
+    # ]
+    # parser2 = CompilerParser(tokens3)
+    # try:
+    #     result2 = parser2.compileProgram()
+    #     print(result2)
+    # except Exception as e:
+    #     print("Test Case 3 Failed:", str(e))
 
 
 
