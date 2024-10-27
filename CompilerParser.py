@@ -30,7 +30,6 @@ class CompilerParser :
         classNameToken = self.mustBe("identifier", None)
 
         classTree = ParseTree("class", None)  
-
         classTree.addChild(ParseTree("identifier", classNameToken.getValue()))
 
         openBracket = self.mustBe("symbol", "{")
@@ -39,7 +38,8 @@ class CompilerParser :
         while self.current().getValue() != "}":
             if self.current().getType() == "keyword" and self.current().getValue() in ["static", "field"]:
                 classTree.addChild(self.compileClassVarDec())
-            elif self.current().getType() == "keyword" and self.current().getValue() in ["constructor", "function", "void"]:
+            elif self.current().getType() == "keyword" and self.current().getValue() in ["constructor", "function", "method"]:
+                # Call compileSubroutine() and add the resulting tree to the class tree
                 classTree.addChild(self.compileSubroutine())
             else:
                 self.next()
@@ -83,23 +83,33 @@ class CompilerParser :
         Generates a parse tree for a method, function, or constructor
         @return a ParseTree that represents the method, function, or constructor
         """
-        subRoutineBodyTree = ParseTree("subroutineBody", "")
-    
-        while self.current().getValue() != "}":
-            if self.current().getValue() == "var":
-                varDecTree = self.compileVarDec()
-                if varDecTree is None:
-                    raise ValueError("compileVarDec() returned None when a variable declaration was expected.")
-                subRoutineBodyTree.addChild(varDecTree)
-            elif self.current().getValue() == "let":
-                letTree = self.compileLet()
-                if letTree is None:
-                    raise ValueError("compileLet() returned None when a let statement was expected.")
-                subRoutineBodyTree.addChild(letTree)
-            else:
-                self.next()  # Move to the next token if not handled
+        subroutineTree = ParseTree("subroutine", "")
 
-        return subRoutineBodyTree
+        # Parse the subroutine keyword (e.g., function, constructor, method)
+        subroutineKeyword = self.mustBe("keyword", None)
+        subroutineTree.addChild(ParseTree("keyword", subroutineKeyword.getValue()))
+
+        # Parse the return type (e.g., void, int)
+        returnType = self.mustBe("keyword", None)
+        subroutineTree.addChild(ParseTree("returnType", returnType.getValue()))
+
+        # Parse the subroutine name (e.g., test)
+        subroutineName = self.mustBe("identifier", None)
+        subroutineTree.addChild(ParseTree("identifier", subroutineName.getValue()))
+
+        # Parse the parameter list
+        self.mustBe("symbol", "(")
+        parameterListTree = self.compileParameterList()  # Handles the parameter list
+        subroutineTree.addChild(parameterListTree)
+        self.mustBe("symbol", ")")
+
+        # Parse the subroutine body (enclosed in curly braces)
+        self.mustBe("symbol", "{")
+        bodyTree = self.compileSubroutineBody()  # This parses the contents inside the {}
+        subroutineTree.addChild(bodyTree)
+        self.mustBe("symbol", "}")
+
+        return subroutineTree
 
     
     
@@ -529,22 +539,22 @@ if __name__ == "__main__":
 
     print('\n')
 
-    # tokens3 = [
-    #     Token("keyword", "class"),
-    #     Token("identifier", "Main"),
-    #     Token("symbol", "{"),
-    #     Token("keyword", "static"),
-    #     Token("keyword", "int"),
-    #     Token("identifier", "a"),
-    #     Token("symbol", ";"),
-    #     Token("symbol", "}")
-    # ]
-    # parser2 = CompilerParser(tokens3)
-    # try:
-    #     result2 = parser2.compileProgram()
-    #     print(result2)
-    # except Exception as e:
-    #     print("Test Case 3 Failed:", str(e))
+    tokens3 = [
+        Token("keyword", "class"),
+        Token("identifier", "Main"),
+        Token("symbol", "{"),
+        Token("keyword", "static"),
+        Token("keyword", "int"),
+        Token("identifier", "a"),
+        Token("symbol", ";"),
+        Token("symbol", "}")
+    ]
+    parser2 = CompilerParser(tokens3)
+    try:
+        result2 = parser2.compileProgram()
+        print(result2)
+    except Exception as e:
+        print("Test Case 3 Failed:", str(e))
 
 
     tokens4 = [
