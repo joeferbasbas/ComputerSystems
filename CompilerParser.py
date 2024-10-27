@@ -32,6 +32,12 @@ class CompilerParser :
         openBracket = self.mustBe("symbol", "{")
         classTree.addChild(ParseTree("symbol", openBracket.getValue()))
 
+        while self.current().getValue() != "}":
+            if self.current().getType() == "keyword" and self.current().getValue() in ["static", "field"]:
+                classTree.addChild(self.compileClassVarDec())
+            else:
+                self.next()
+
         closeBraceToken = self.mustBe("symbol", "}")
         classTree.addChild(ParseTree("symbol", closeBraceToken.getValue()))
 
@@ -44,18 +50,23 @@ class CompilerParser :
         Generates a parse tree for a static variable declaration or field declaration
         @return a ParseTree that represents a static variable declaration or field declaration
         """
-        declarationType = self.current().getValue()  # Get 'static' or 'field'
-        declarationTree = ParseTree("declaration", declarationType)
-        self.next()  # Move past 'static' or 'field'
-        
-        typeToken = self.mustBe("identifier", None)  # Expect the type
-        declarationTree.addChild(ParseTree("type", typeToken.getValue()))
-        
-        varNameToken = self.mustBe("identifier", None)  # Expect the variable name
-        declarationTree.addChild(ParseTree("varName", varNameToken.getValue()))
-        
-        self.mustBe("symbol", ";")  # Expect the semicolon
-        return declarationTree
+        varDecTree = ParseTree("classVarDec", "")
+        keywordToken = self.mustBe("keyword", None)  # either 'static' or 'field'
+        varDecTree.addChild(ParseTree("keyword", keywordToken.getValue()))
+
+        # Parse type (e.g., 'int')
+        typeToken = self.mustBe("keyword", None)  # 'int', 'boolean', etc.
+        varDecTree.addChild(ParseTree("keyword", typeToken.getValue()))
+
+        # Parse variable name
+        varNameToken = self.mustBe("identifier", None)
+        varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
+
+        # Parse semicolon
+        self.mustBe("symbol", ";")
+        varDecTree.addChild(ParseTree("symbol", ";"))
+
+        return varDecTree
 
 
       
@@ -386,50 +397,57 @@ if __name__ == "__main__":
     #     print(f"Error Parsing: {e}")
 
 
-    tokens1 = [
+    # tokens1 = [
+    #     Token("keyword", "class"),
+    #     Token("identifier", "Main"),
+    #     Token("symbol", "{"),
+    #     Token("symbol", "}")
+    # ]
+    # parser1 = CompilerParser(tokens1)
+    # try:
+    #     result1 = parser1.compileProgram()
+    #     print("Test Case 1 Passed: Valid Class Parsing")
+    #     print(result1)
+    # except Exception as e:
+    #     print("Test Case 1 Failed: Valid Class Parsing")
+    #     print(str(e))
+
+        
+
+    # tokens2 = [
+    #     Token("keyword", "static"),
+    #     Token("keyword", "int"),
+    #     Token("identifier", "a"),
+    #     Token("symbol", ";")
+    # ]
+    # parser2 = CompilerParser(tokens2)
+    # try:
+    #     result2 = parser2.compileProgram()
+    #     print("Test Case 2 Failed: Should have thrown an error")
+    # except ParseException as e:
+    #     print("Test Case 2 Passed: Error correctly thrown\n")
+    #     print(str(e))
+
+
+
+    print('\n')
+
+    tokens3 = [
         Token("keyword", "class"),
         Token("identifier", "Main"),
         Token("symbol", "{"),
-        Token("symbol", "}")
-    ]
-    parser1 = CompilerParser(tokens1)
-    try:
-        result1 = parser1.compileProgram()
-        print("Test Case 1 Passed: Valid Class Parsing")
-        print(result1)
-    except Exception as e:
-        print("Test Case 1 Failed: Valid Class Parsing")
-        print(str(e))
-
-    # Test Case 2: Invalid Program Start
-    tokens2 = [
         Token("keyword", "static"),
         Token("keyword", "int"),
         Token("identifier", "a"),
-        Token("symbol", ";")
+        Token("symbol", ";"),
+        Token("symbol", "}")
     ]
-    parser2 = CompilerParser(tokens2)
+    parser2 = CompilerParser(tokens3)
     try:
         result2 = parser2.compileProgram()
-        print("Test Case 2 Failed: Should have thrown an error")
-    except ParseException as e:
-        print("Test Case 2 Passed: Error correctly thrown")
-        print(str(e))
-
-    # test_cases = []
-    # test_cases.append(Token("keyword", "static"))
-    # test_cases.append(Token("identifier", "int"))
-    # test_cases.append(Token("identifier", "myVar"))
-    # test_cases.append(Token("symbol", ";"))
-    
-
-    # varDecParser = CompilerParser(test_cases)
-    # try:
-    #     var_declaration = varDecParser.compileClassVarDec()
-    #     print("Parsed Variable Declaration:")
-    #     print(var_declaration)
-    # except ParseException as e:
-    #     print(f'Error parsing: {e}')
+        print(result2)
+    except Exception as e:
+        print("Test Case 3 Failed:", str(e))
 
 
 
