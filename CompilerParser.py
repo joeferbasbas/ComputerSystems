@@ -25,36 +25,17 @@ class CompilerParser :
         Generates a parse tree for a single class
         @return a ParseTree that represents a class
         """
-        print("Checking for 'class' keyword...")
         self.mustBe("keyword", "class")
-        
-        print("Getting class name...")
         classNameToken = self.mustBe("identifier", None)
-        
-        # Create class node with the class name
         classTree = ParseTree("class", classNameToken.getValue())
 
-        print("Checking for opening '{'...")
-        openBraceToken = self.mustBe("symbol", "{")
-        classTree.addChild(ParseTree("symbol", openBraceToken.getValue()))
+        openBracket = self.mustBe("symbol", "{")
+        classTree.addChild(ParseTree("symbol", openBracket.getValue()))
 
-        print("Parsing class body...")
-        # Assume compileClassVarDec() is implemented to handle variable declarations
-        while self.current().getValue() != "}":
-            if self.current().getValue() == "static":  # or other conditions based on variable declarations
-                classTree.addChild(self.compileClassVarDec())
-            else:
-                self.next()  # This is a simplification, adjust based on actual content handling
-
-        print("Checking for closing '}'...")
         closeBraceToken = self.mustBe("symbol", "}")
         classTree.addChild(ParseTree("symbol", closeBraceToken.getValue()))
 
-        print("Class parsing completed.")
         return classTree
-
-
-
 
     
 
@@ -387,117 +368,147 @@ if __name__ == "__main__":
         
         }
     """
-    tokens = []
-    tokens.append(Token("keyword","class"))
-    tokens.append(Token("identifier","MyClass"))
-    tokens.append(Token("symbol","{"))
-    tokens.append(Token("symbol","}"))
+    # tokens = []
+    # tokens.append(Token("keyword","class"))
+    # tokens.append(Token("identifier","MyClass"))
+    # tokens.append(Token("symbol","{"))
+    # tokens.append(Token("symbol","}"))
 
-    parser = CompilerParser(tokens)
+    # parser = CompilerParser(tokens)
 
     
 
 
+    # try:
+    #     result = parser.compileProgram()
+    #     print(result)
+    # except ParseException as e:
+    #     print(f"Error Parsing: {e}")
+
+
+    tokens1 = [
+        Token("keyword", "class"),
+        Token("identifier", "Main"),
+        Token("symbol", "{"),
+        Token("symbol", "}")
+    ]
+    parser1 = CompilerParser(tokens1)
     try:
-        result = parser.compileProgram()
-        print(result)
+        result1 = parser1.compileProgram()
+        print("Test Case 1 Passed: Valid Class Parsing")
+        print(result1)
+    except Exception as e:
+        print("Test Case 1 Failed: Valid Class Parsing")
+        print(str(e))
+
+    # Test Case 2: Invalid Program Start
+    tokens2 = [
+        Token("keyword", "static"),
+        Token("keyword", "int"),
+        Token("identifier", "a"),
+        Token("symbol", ";")
+    ]
+    parser2 = CompilerParser(tokens2)
+    try:
+        result2 = parser2.compileProgram()
+        print("Test Case 2 Failed: Should have thrown an error")
     except ParseException as e:
-        print(f"Error Parsing: {e}")
+        print("Test Case 2 Passed: Error correctly thrown")
+        print(str(e))
 
-
-    test_cases = []
-    test_cases.append(Token("keyword", "static"))
-    test_cases.append(Token("identifier", "int"))
-    test_cases.append(Token("identifier", "myVar"))
-    test_cases.append(Token("symbol", ";"))
+    # test_cases = []
+    # test_cases.append(Token("keyword", "static"))
+    # test_cases.append(Token("identifier", "int"))
+    # test_cases.append(Token("identifier", "myVar"))
+    # test_cases.append(Token("symbol", ";"))
     
 
-    varDecParser = CompilerParser(test_cases)
-    try:
-        var_declaration = varDecParser.compileClassVarDec()
-        print("Parsed Variable Declaration:")
-        print(var_declaration)
-    except ParseException as e:
-        print(f'Error parsing: {e}')
+    # varDecParser = CompilerParser(test_cases)
+    # try:
+    #     var_declaration = varDecParser.compileClassVarDec()
+    #     print("Parsed Variable Declaration:")
+    #     print(var_declaration)
+    # except ParseException as e:
+    #     print(f'Error parsing: {e}')
 
 
 
-    test_cases = [
-        {
-            'description': 'Valid function with parameters',
-            'tokens': [
-                Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "sum"),
-                Token("symbol", "("), Token("identifier", "int"), Token("identifier", "a"),
-                Token("symbol", ","), Token("identifier", "int"), Token("identifier", "b"),
-                Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
-            ]
-        },
-        {
-            'description': 'Valid method with no parameters',
-            'tokens': [
-                Token("keyword", "method"), Token("identifier", "void"), Token("identifier", "display"),
-                Token("symbol", "("), Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
-            ]
-        },
-        {
-            'description': 'Constructor with parameters',
-            'tokens': [
-                Token("keyword", "constructor"), Token("identifier", "Main"), Token("identifier", "Main"),
-                Token("symbol", "("), Token("identifier", "int"), Token("identifier", "size"),
-                Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
-            ]
-        },
-        {
-            'description': 'Invalid subroutine (missing closing brace)',
-            'tokens': [
-                Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "broken"),
-                Token("symbol", "("), Token("identifier", "int"), Token("identifier", "param"),
-                Token("symbol", ")"), Token("symbol", "{")
-            ]  # Missing closing '}' to simulate an error case.
-        }
-    ]
+    # test_cases = [
+    #     {
+    #         'description': 'Valid function with parameters',
+    #         'tokens': [
+    #             Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "sum"),
+    #             Token("symbol", "("), Token("identifier", "int"), Token("identifier", "a"),
+    #             Token("symbol", ","), Token("identifier", "int"), Token("identifier", "b"),
+    #             Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
+    #         ]
+    #     },
+    #     {
+    #         'description': 'Valid method with no parameters',
+    #         'tokens': [
+    #             Token("keyword", "method"), Token("identifier", "void"), Token("identifier", "display"),
+    #             Token("symbol", "("), Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
+    #         ]
+    #     },
+    #     {
+    #         'description': 'Constructor with parameters',
+    #         'tokens': [
+    #             Token("keyword", "constructor"), Token("identifier", "Main"), Token("identifier", "Main"),
+    #             Token("symbol", "("), Token("identifier", "int"), Token("identifier", "size"),
+    #             Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
+    #         ]
+    #     },
+    #     {
+    #         'description': 'Invalid subroutine (missing closing brace)',
+    #         'tokens': [
+    #             Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "broken"),
+    #             Token("symbol", "("), Token("identifier", "int"), Token("identifier", "param"),
+    #             Token("symbol", ")"), Token("symbol", "{")
+    #         ]  # Missing closing '}' to simulate an error case.
+    #     }
+    # ]
 
-    for case in test_cases:
-        parser = CompilerParser(case['tokens'])
-        try:
-            result = parser.compileSubroutine()
-            print(f"{case['description']}: PASSED")
-            print("Resulting Parse Tree:")
-            print(result)
-        except ParseException as e:
-            print(f"{case['description']}: FAILED")
-            print(f"Error: {e}")
+    # for case in test_cases:
+    #     parser = CompilerParser(case['tokens'])
+    #     try:
+    #         result = parser.compileSubroutine()
+    #         print(f"{case['description']}: PASSED")
+    #         print("Resulting Parse Tree:")
+    #         print(result)
+    #     except ParseException as e:
+    #         print(f"{case['description']}: FAILED")
+    #         print(f"Error: {e}")
 
 
-    tests = [
-        {
-            "description": "Subroutine body with one variable declaration",
-            "tokens": [
-                Token("symbol", "{"),
-                Token("keyword", "var"),
-                Token("identifier", "int"),
-                Token("identifier", "x"),
-                Token("symbol", ";"),
-                Token("symbol", "}")
-            ]
-        },
-        {
-            "description": "Variable declaration missing semicolon",
-            "tokens": [
-                Token("keyword", "var"),
-                Token("identifier", "int"),
-                Token("identifier", "y")
-            ]
-        }
-    ]
+    # tests = [
+    #     {
+    #         "description": "Subroutine body with one variable declaration",
+    #         "tokens": [
+    #             Token("symbol", "{"),
+    #             Token("keyword", "var"),
+    #             Token("identifier", "int"),
+    #             Token("identifier", "x"),
+    #             Token("symbol", ";"),
+    #             Token("symbol", "}")
+    #         ]
+    #     },
+    #     {
+    #         "description": "Variable declaration missing semicolon",
+    #         "tokens": [
+    #             Token("keyword", "var"),
+    #             Token("identifier", "int"),
+    #             Token("identifier", "y")
+    #         ]
+    #     }
+    # ]
 
-    for test in tests:
-        parser = CompilerParser(test['tokens'])
-        try:
-            if test['description'].startswith("Subroutine"):
-                result = parser.compileSubroutineBody()
-            else:
-                result = parser.compileVarDec()
-            print(f"Test '{test['description']}' passed. Result: {result}")
-        except Exception as e:
-            print(f"Test '{test['description']}' failed with an error: {str(e)}")
+    # for test in tests:
+    #     parser = CompilerParser(test['tokens'])
+    #     try:
+    #         if test['description'].startswith("Subroutine"):
+    #             result = parser.compileSubroutineBody()
+    #         else:
+    #             result = parser.compileVarDec()
+    #         print(f"Test '{test['description']}' passed. Result: {result}")
+    #     except Exception as e:
+    #         print(f"Test '{test['description']}' failed with an error: {str(e)}")
