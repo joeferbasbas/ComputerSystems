@@ -57,19 +57,27 @@ class CompilerParser :
         @return a ParseTree that represents a static variable declaration or field declaration
         """
         varDecTree = ParseTree("classVarDec", "")
-        keywordToken = self.mustBe("keyword", None) 
+    
+        # Parse the keyword 'field' or 'static'
+        keywordToken = self.mustBe("keyword", None)
         varDecTree.addChild(ParseTree("keyword", keywordToken.getValue()))
 
-        
-        typeToken = self.mustBe("keyword", None)  
-        varDecTree.addChild(ParseTree("keyword", typeToken.getValue()))
+        # Parse the type (e.g., 'boolean', 'int', 'char', etc.)
+        typeToken = self.mustBe("keyword", None)
+        varDecTree.addChild(ParseTree("type", typeToken.getValue()))
 
-       
+        # Parse the first variable name
         varNameToken = self.mustBe("identifier", None)
         varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
 
-       
-        self.mustBe("symbol", ";")
+        # Handle additional variables separated by commas
+        while self.current().getValue() == ",":
+            self.next()  # Move past the comma
+            varNameToken = self.mustBe("identifier", None)  # Expect another variable name after the comma
+            varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
+
+        # Now we expect a semicolon at the end of the declaration
+        self.mustBe("symbol", ";")  # This is the key line that ensures a semicolon at the end
         varDecTree.addChild(ParseTree("symbol", ";"))
 
         return varDecTree
@@ -189,24 +197,41 @@ class CompilerParser :
         Generates a parse tree for a variable declaration
         @return a ParseTree that represents a var declaration
         """
-        varDecTree = ParseTree("variableDeclaration", "")
-        self.mustBe("keyword", "var")
+        varDecTree = ParseTree("classVarDec", "")
+    
+        # Parse the keyword 'field' or 'static'
+        keywordToken = self.mustBe("keyword", None)
+        print(f"Parsed keyword: {keywordToken.getValue()}")  # Debugging
+        varDecTree.addChild(ParseTree("keyword", keywordToken.getValue()))
 
+        # Parse the type (e.g., 'boolean', 'int', 'char', etc.)
         typeToken = self.mustBe("keyword", None)
+        print(f"Parsed type: {typeToken.getValue()}")  # Debugging
         varDecTree.addChild(ParseTree("type", typeToken.getValue()))
 
-        while True:
-            varNameToken = self.mustBe("identifier", None)
-            varDecTree.addChild(ParseTree("varName", varNameToken.getValue()))
+        # Parse the first variable name
+        varNameToken = self.mustBe("identifier", None)
+        print(f"Parsed variable: {varNameToken.getValue()}")  # Debugging
+        varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
 
-            if self.current().getValue() == ",":
-                self.next()
-            elif self.current().getValue() == ";":
-                self.next()
-                break
-            else:
-                raise ParseException("Expected ',' or ';', but found " + self.current().getValue())
-        
+        # Handle additional variables separated by commas
+        print(f"Current token before loop: {self.current().getValue()}")  # Debugging
+
+        while self.current().getValue() == ",":
+            print(f"Found comma, expecting another variable...")  # Debugging
+            self.next()  # Move past the comma
+            print(f"Moved past comma. Current token: {self.current().getValue()}")  # Debugging
+            
+            varNameToken = self.mustBe("identifier", None)  # Expect another variable name after the comma
+            print(f"Parsed variable: {varNameToken.getValue()}")  # Debugging
+            varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
+
+
+        # Expect a semicolon at the end of the declaration
+        self.mustBe("symbol", ";")
+        print(f"Found semicolon, end of declaration.")  # Debugging
+        varDecTree.addChild(ParseTree("symbol", ";"))
+
         return varDecTree
     
 
@@ -535,7 +560,25 @@ if __name__ == "__main__":
     #     print("Test Case 2 Passed: Error correctly thrown\n")
     #     print(str(e))
 
+    tokens2 = [
+        Token("keyword", "field"),        # 'field' keyword
+        Token("keyword", "boolean"),      # 'boolean' type
+        Token("identifier", "test1"),     # first variable
+        Token("symbol", ","),             # comma
+        Token("identifier", "test2"),     # second variable
+        Token("symbol", ";")              # semicolon
+    ]
 
+    # Initialize the parser with these tokens
+    parser = CompilerParser(tokens2)
+
+    try:
+        # Attempt to parse the class variable declaration
+        result = parser.compileClassVarDec()
+        print(result)  # This will print the resulting parse tree
+    except Exception as e:
+        print("ParseException Occurred")
+        print(str(e))  # Print the error for debugging
 
     print('\n')
 
