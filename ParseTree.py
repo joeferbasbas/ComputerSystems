@@ -7,63 +7,28 @@ class ParseException(Exception):
 
 
 class ParseTree():
-
     def __init__(self, node_type, value):
-        """
-        A node in a Parse Tree data structure
-        @param node_type The type of node (see element types).
-        @param value The node's value. Should only be used on terminal nodes/leaves, and empty otherwise.
-        """
+        if node_type is None:
+            raise ValueError("ParseTree node_type cannot be None.")
         self.node_type = node_type
         self.value = value
         self.children = []
-    
 
-    def addChild(self,child):
-        """
-        Adds a ParseTree as a child of this ParseTree
-        @param child The ParseTree to add
-        """
+    def addChild(self, child):
+        if child is None:
+            raise ValueError(f"Cannot add None as a child to node of type {self.node_type}")
+        if not hasattr(child, 'node_type'):
+            raise TypeError(f"Child node does not have a 'node_type' attribute: {child}")
+        
         print(f"Adding child with type {child.node_type} to parent with type {self.node_type}")
         self.children.append(child)
-    
 
-    def getChildren(self):
-        """
-        Get a list of child nodes in the order they were added.
-        @return A LinkedList of ParseTrees 
-        """
-        return self.children
-    
-
-    def getType(self):
-        """
-        Get the type of this ParseTree Node
-        @return The type of node (see element types).
-        """
-        return self.node_type
-    
-
-    def getValue(self):
-        """
-        Get the value of this ParseTree Node
-        @return The node's value. Should only be used on terminal nodes/leaves, and empty otherwise.
-        """
-        return self.value
-    
-
-    def __str__(self,depth=0):
-        """
-        Generate a string from this ParseTree
-        @return A printable representation of this ParseTree with indentation
-        """              
-        indent = "  " * depth  # Indentation to show tree structure
-        result = indent + self.node_type
-        if self.value:
-            result += " (" + str(self.value) + ")"  # Display node type and value
+    def __str__(self):
+        # Example for debugging the tree structure
+        output = f"Node: {self.node_type}, Value: {self.value}\n"
         for child in self.children:
-            result += "\n" + child.__str__(depth + 1)  # Recursively print children
-        return result
+            output += f"    {str(child)}"
+        return output
 
     
 
@@ -81,4 +46,7 @@ class Token(ParseTree):
 
     def getValue(self):
         return self.value
+
+    def __str__(self):
+        return f"Token(type={self.token_type}, value={self.value})"
     

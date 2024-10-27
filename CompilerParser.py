@@ -27,29 +27,25 @@ class CompilerParser :
         """
         self.mustBe("keyword", "class")
 
-        # Parse class name (identifier)
         classNameToken = self.mustBe("identifier", None)
 
-        # Create the class parse tree node
-        classTree = ParseTree("class", None)  # No value for the class node itself
+        classTree = ParseTree("class", None)  
 
-        # Add class name as a child node
         classTree.addChild(ParseTree("identifier", classNameToken.getValue()))
 
-        # Parse opening '{'
         openBracket = self.mustBe("symbol", "{")
-        classTree.addChild(ParseTree("symbol", openBracket.getValue()))  # Add '{' to the parse tree
+        classTree.addChild(ParseTree("symbol", openBracket.getValue()))  
 
-        # Parse the class body (handle classVarDec)
         while self.current().getValue() != "}":
             if self.current().getType() == "keyword" and self.current().getValue() in ["static", "field"]:
                 classTree.addChild(self.compileClassVarDec())
+            elif self.current().getType() == "keyword" and self.current().getValue() in ["constructor", "function", "void"]:
+                classTree.addChild(self.compileSubroutine())
             else:
                 self.next()
 
-        # Parse closing '}'
         closeBraceToken = self.mustBe("symbol", "}")
-        classTree.addChild(ParseTree("symbol", closeBraceToken.getValue()))  # Add '}' to the parse tree
+        classTree.addChild(ParseTree("symbol", closeBraceToken.getValue()))  
 
         return classTree
 
@@ -61,18 +57,18 @@ class CompilerParser :
         @return a ParseTree that represents a static variable declaration or field declaration
         """
         varDecTree = ParseTree("classVarDec", "")
-        keywordToken = self.mustBe("keyword", None)  # either 'static' or 'field'
+        keywordToken = self.mustBe("keyword", None) 
         varDecTree.addChild(ParseTree("keyword", keywordToken.getValue()))
 
-        # Parse type (e.g., 'int')
-        typeToken = self.mustBe("keyword", None)  # 'int', 'boolean', etc.
+        
+        typeToken = self.mustBe("keyword", None)  
         varDecTree.addChild(ParseTree("keyword", typeToken.getValue()))
 
-        # Parse variable name
+       
         varNameToken = self.mustBe("identifier", None)
         varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
 
-        # Parse semicolon
+       
         self.mustBe("symbol", ";")
         varDecTree.addChild(ParseTree("symbol", ";"))
 
@@ -87,33 +83,24 @@ class CompilerParser :
         Generates a parse tree for a method, function, or constructor
         @return a ParseTree that represents the method, function, or constructor
         """
-        subroutineTypeToken = self.current()
-        self.next()  # Move past the type keyword
+        subRoutineBodyTree = ParseTree("subroutineBody", "")
+    
+        while self.current().getValue() != "}":
+            if self.current().getValue() == "var":
+                varDecTree = self.compileVarDec()
+                if varDecTree is None:
+                    raise ValueError("compileVarDec() returned None when a variable declaration was expected.")
+                subRoutineBodyTree.addChild(varDecTree)
+            elif self.current().getValue() == "let":
+                letTree = self.compileLet()
+                if letTree is None:
+                    raise ValueError("compileLet() returned None when a let statement was expected.")
+                subRoutineBodyTree.addChild(letTree)
+            else:
+                self.next()  # Move to the next token if not handled
 
-        if subroutineTypeToken.getValue() == "constructor":
-            # Constructor name, usually the same as the class name
-            constructorNameToken = self.mustBe("identifier", None)
-            self.mustBe("symbol", "(")  # Now expect the '('
-        else:
-            returnTypeToken = self.mustBe("identifier", None)
-            subroutineNameToken = self.mustBe("identifier", None)
-            self.mustBe("symbol", "(")
+        return subRoutineBodyTree
 
-        # Process parameters
-        parameters = self.compileParameterList()
-        self.mustBe("symbol", ")")
-
-        # Subroutine body assumed to be enclosed with '{' and '}'
-        self.mustBe("symbol", "{")
-        # Process the body here (not implemented)
-        self.mustBe("symbol", "}")
-
-        return ParseTree("subroutine", {
-            "type": subroutineTypeToken.getValue(),
-            "name": constructorNameToken.getValue() if subroutineTypeToken.getValue() == "constructor" else subroutineNameToken.getValue(),
-            "parameters": parameters,
-            # Body would be added here
-        })
     
     
     def compileParameterList(self):
@@ -121,54 +108,70 @@ class CompilerParser :
         Generates a parse tree for a subroutine's parameters
         @return a ParseTree that represents a subroutine's parameters
         """
-        paramListTree = ParseTree("parameterList", "")
-    
-        # Check if the next token is ')' which means the parameter list is empty
-        if self.current().getValue() == ")":
-            return paramListTree  # Return empty parameter list
+        parameterListTree = ParseTree("parameterList", "")
 
-        while True:
-            # Expect type identifier
-            typeToken = self.mustBe("identifier", None)
-            # Expect parameter name identifier
-            paramNameToken = self.mustBe("identifier", None)
-            
-            paramListTree.addChild(ParseTree("parameter", typeToken.getValue() + " " + paramNameToken.getValue()))
-            
-            # If the next token is ',', there are more parameters
-            if self.current().getValue() == ",":
-                self.next()  # Move past the comma to the next parameter
-            else:
-                break  # Exit the loop if there's no comma
+            # Only attempt to parse if we expect parameters (i.e., if the current token is a keyword or identifier)
+        if self.current().getType() == "keyword":
+            while True:
+                paramType = self.mustBe("keyword", None)  # Expect parameter type
+                paramName = self.mustBe("identifier", None)  # Expect parameter name
+                parameterListTree.addChild(ParseTree("parameter", f"{paramType.getValue()} {paramName.getValue()}"))
 
-        return paramListTree 
-    
+                if self.current().getValue() == ",":
+                    self.next()  # Skip comma, continue with next parameter
+                else:
+                    break
+
+        return parameterListTree
+        
     
     def compileSubroutineBody(self):
         """
         Generates a parse tree for a subroutine's body
         @return a ParseTree that represents a subroutine's body
         """
-        print("Parsing subroutine body...")
-        bodyTree = ParseTree("subroutineBody", "")
-
-        self.mustBe("symbol", "{")  # Assuming subroutine body starts with '{'
-        
-        while self.current().getValue() != "}":
+        subRoutineBodyListTree = ParseTree("subroutineBody", "")
+    
+        while self.current().getValue() != "}":  # Continue until you hit the closing brace
+            # Check if the current token is a variable declaration
             if self.current().getValue() == "var":
-                bodyTree.addChild(self.compileVarDec())
-            elif self.current().getValue() == "if":
-                bodyTree.addChild(self.compileIf())
+                varDecTree = self.compileVarDec()
+                if varDecTree:
+                    subRoutineBodyListTree.addChild(varDecTree)
+            
+            # Check if the current token is a let statement
+            elif self.current().getValue() == "let":
+                letTree = self.compileLet()
+                if letTree:
+                    subRoutineBodyListTree.addChild(letTree)
+            
+            # Handle other possible statements in the subroutine body
+            elif self.current().getValue() == "return":
+                returnTree = self.compileReturn()
+                if returnTree:
+                    subRoutineBodyListTree.addChild(returnTree)
+            
+            elif self.current().getValue() == "do":
+                doTree = self.compileDo()
+                if doTree:
+                    subRoutineBodyListTree.addChild(doTree)
+            
             elif self.current().getValue() == "while":
-                bodyTree.addChild(self.compileWhile())
-            # Add more statement types as necessary
+                whileTree = self.compileWhile()
+                if whileTree:
+                    subRoutineBodyListTree.addChild(whileTree)
+            
+            elif self.current().getValue() == "if":
+                ifTree = self.compileIf()
+                if ifTree:
+                    subRoutineBodyListTree.addChild(ifTree)
+            
             else:
-                # Simple handling for unrecognized or end statements (e.g., break, return)
-                self.next()  # Skip or simple parse of other types of statements
-                
-        self.mustBe("symbol", "}")  # End of subroutine body
+                self.next()  # Skip any tokens that don't start a valid statement
 
-        return bodyTree
+        return subRoutineBodyListTree
+
+
     
     
     def compileVarDec(self):
@@ -176,30 +179,25 @@ class CompilerParser :
         Generates a parse tree for a variable declaration
         @return a ParseTree that represents a var declaration
         """
-        print("Parsing variable declaration...")
         varDecTree = ParseTree("variableDeclaration", "")
-        
-        # Assume the 'var' keyword has already been identified if this method is called
         self.mustBe("keyword", "var")
-        
-        typeToken = self.mustBe("identifier", None)  # Type of the variable(s)
+
+        typeToken = self.mustBe("keyword", None)
         varDecTree.addChild(ParseTree("type", typeToken.getValue()))
-        
-        # Handle one or more variable names separated by commas
+
         while True:
             varNameToken = self.mustBe("identifier", None)
             varDecTree.addChild(ParseTree("varName", varNameToken.getValue()))
-            
-            # Check if there is a comma, indicating more variables
+
             if self.current().getValue() == ",":
                 self.next()
             elif self.current().getValue() == ";":
                 self.next()
-                break  # End of variable declaration
+                break
             else:
                 raise ParseException("Expected ',' or ';', but found " + self.current().getValue())
-
-        return varDecTree 
+        
+        return varDecTree
     
 
     def compileStatements(self):
@@ -207,19 +205,7 @@ class CompilerParser :
         Generates a parse tree for a series of statements
         @return a ParseTree that represents the series of statements
         """
-        statements = ParseTree("statements", "")
-        while self.current().getValue() not in ["}", "else"]:  # Adjust as needed for your language
-            if self.current().getValue() == "let":
-                statements.addChild(self.compileLet())
-            elif self.current().getValue() == "if":
-                statements.addChild(self.compileIf())
-            elif self.current().getValue() == "while":
-                statements.addChild(self.compileWhile())
-            elif self.current().getValue() == "do":
-                statements.addChild(self.compileDo())
-            else:
-                self.next()  # Skip tokens that don't start a statement
-        return statements
+        return None
     
     
     def compileLet(self):
@@ -227,16 +213,26 @@ class CompilerParser :
         Generates a parse tree for a let statement
         @return a ParseTree that represents the statement
         """
+        print(f"Parsing let statement at token: {self.current()}")
+    
         self.mustBe("keyword", "let")
         varName = self.mustBe("identifier", None)
+        
+        if varName is None:
+            raise ValueError("Expected an identifier for variable name in let statement, got None.")
+        
         letTree = ParseTree("letStatement", varName.getValue())
 
         if self.current().getValue() == "=":
             self.next()  # Skip over the '=' symbol
-            letTree.addChild(self.compileExpression())  # Parse the expression that represents the new value
+            exprTree = self.compileExpression()
+            if exprTree is None:
+                raise ValueError("Expected an expression in let statement after '=' but got None.")
+            letTree.addChild(exprTree)
             self.mustBe("symbol", ";")  # Expect a semicolon at the end of the statement
 
         return letTree
+        
 
 
     def compileIf(self):
@@ -244,25 +240,50 @@ class CompilerParser :
         Generates a parse tree for an if statement
         @return a ParseTree that represents the statement
         """
+        ifTree = ParseTree("ifStatement", "")
+    
+        # 'if' keyword
         self.mustBe("keyword", "if")
+        ifTree.addChild(ParseTree("keyword", "if"))
+        
+        # Opening parenthesis '('
         self.mustBe("symbol", "(")
-        condition = self.compileExpression()  # Assuming compileExpression() is implemented
+        
+        # Parse the condition (expression)
+        conditionTree = self.compileExpression()
+        if conditionTree:
+            ifTree.addChild(conditionTree)
+        
+        # Closing parenthesis ')'
         self.mustBe("symbol", ")")
-
+        
+        # Opening brace '{'
         self.mustBe("symbol", "{")
-        ifBody = self.compileStatements()
+        
+        # Parse the 'if' body (statements inside the if block)
+        ifBodyTree = self.compileStatements()
+        if ifBodyTree:
+            ifTree.addChild(ifBodyTree)
+        
+        # Closing brace '}'
         self.mustBe("symbol", "}")
-
-        ifTree = ParseTree("ifStatement", condition)
-        ifTree.addChild(ifBody)
-
+        
+        # Optional 'else' clause
         if self.current().getValue() == "else":
-            self.next()
+            self.next()  # Skip 'else' keyword
+            ifTree.addChild(ParseTree("keyword", "else"))
+            
+            # Opening brace for 'else' block
             self.mustBe("symbol", "{")
-            elseBody = self.compileStatements()
+            
+            # Parse the 'else' body (statements inside the else block)
+            elseBodyTree = self.compileStatements()
+            if elseBodyTree:
+                ifTree.addChild(elseBodyTree)
+            
+            # Closing brace '}'
             self.mustBe("symbol", "}")
-            ifTree.addChild(elseBody)
-
+        
         return ifTree
 
     
@@ -271,18 +292,36 @@ class CompilerParser :
         Generates a parse tree for a while statement
         @return a ParseTree that represents the statement
         """
+        whileTree = ParseTree("whileStatement", "")
+    
+        # 'while' keyword
         self.mustBe("keyword", "while")
+        whileTree.addChild(ParseTree("keyword", "while"))
+        
+        # Opening parenthesis '('
         self.mustBe("symbol", "(")
-        condition = self.compileExpression()
+        
+        # Parse the condition (expression)
+        conditionTree = self.compileExpression()
+        if conditionTree:
+            whileTree.addChild(conditionTree)
+        
+        # Closing parenthesis ')'
         self.mustBe("symbol", ")")
-
+        
+        # Opening brace '{'
         self.mustBe("symbol", "{")
-        whileBody = self.compileStatements()
+        
+        # Parse the 'while' body (statements inside the while block)
+        whileBodyTree = self.compileStatements()
+        if whileBodyTree:
+            whileTree.addChild(whileBodyTree)
+        
+        # Closing brace '}'
         self.mustBe("symbol", "}")
-
-        whileTree = ParseTree("whileStatement", condition)
-        whileTree.addChild(whileBody)
+        
         return whileTree
+        
 
 
     def compileDo(self):
@@ -290,16 +329,21 @@ class CompilerParser :
         Generates a parse tree for a do statement
         @return a ParseTree that represents the statement
         """
+        doTree = ParseTree("doStatement", "")
+    
+        # 'do' keyword
         self.mustBe("keyword", "do")
-        methodName = self.mustBe("identifier", None)  # Assuming simple case; adjust for method calls
-        self.mustBe("symbol", "(")
-        # Assuming compileExpressionList() handles the list of expressions for arguments
-        argumentList = self.compileExpressionList()  
-        self.mustBe("symbol", ")")
+        doTree.addChild(ParseTree("keyword", "do"))
+        
+        # Parse the subroutine call
+        subroutineCallTree = self.compileExpressionList()  # Assuming you have a method for parsing subroutine calls
+        
+        if subroutineCallTree:
+            doTree.addChild(subroutineCallTree)
+        
+        # Expect a semicolon ';' at the end of the do statement
         self.mustBe("symbol", ";")
-
-        doTree = ParseTree("doStatement", methodName.getValue())
-        doTree.addChild(argumentList)
+        
         return doTree
 
 
@@ -308,7 +352,22 @@ class CompilerParser :
         Generates a parse tree for a return statement
         @return a ParseTree that represents the statement
         """
-        return None 
+        returnTree = ParseTree("returnStatement", "")
+    
+        # 'return' keyword
+        self.mustBe("keyword", "return")
+        returnTree.addChild(ParseTree("keyword", "return"))
+        
+        # Check if there's an expression to return
+        if self.current().getValue() != ";":
+            expressionTree = self.compileExpression()
+            if expressionTree:
+                returnTree.addChild(expressionTree)
+        
+        # Expect a semicolon ';' at the end of the return statement
+        self.mustBe("symbol", ";")
+        
+        return returnTree
 
 
     def compileExpression(self):
@@ -316,7 +375,29 @@ class CompilerParser :
         Generates a parse tree for an expression
         @return a ParseTree that represents the expression
         """
-        return None 
+        exprTree = ParseTree("expression", "")
+    
+        # Handle a single term (this would be extended to more complex expressions)
+        termTree = self.compileTerm()
+        if termTree:
+            exprTree.addChild(termTree)
+        
+        # Optionally, handle operators and additional terms
+        while self.current().getValue() in ["+", "-", "*", "/", "&", "|", "<", ">", "="]:
+            operatorToken = self.current()
+            self.next()  # Advance to the next token (after the operator)
+            
+            # Add the operator to the expression tree
+            exprTree.addChild(ParseTree("operator", operatorToken.getValue()))
+            
+            # Parse the next term and add it to the tree
+            termTree = self.compileTerm()
+            if termTree:
+                exprTree.addChild(termTree)
+            else:
+                raise ParseException(f"Expected a term after operator {operatorToken.getValue()} but got None")
+        
+        return exprTree
 
 
     def compileTerm(self):
@@ -324,7 +405,29 @@ class CompilerParser :
         Generates a parse tree for an expression term
         @return a ParseTree that represents the expression term
         """
-        return None 
+        currentToken = self.current()
+
+        # Handle integer constants
+        if currentToken.getType() == "integerConstant":
+            termTree = ParseTree("integerConstant", currentToken.getValue())
+            self.next()  # Move to the next token
+            return termTree
+
+        # Handle identifiers (variables or subroutine calls)
+        elif currentToken.getType() == "identifier":
+            termTree = ParseTree("identifier", currentToken.getValue())
+            self.next()  # Move to the next token
+            return termTree
+
+        # Handle parentheses expressions (e.g., "(a + b)")
+        elif currentToken.getValue() == "(":
+            self.mustBe("symbol", "(")
+            exprTree = self.compileExpression()
+            self.mustBe("symbol", ")")
+            return exprTree
+
+        else:
+            raise ParseException(f"Unexpected term: {currentToken.getValue()}")
 
 
     def compileExpressionList(self):
@@ -391,20 +494,20 @@ if __name__ == "__main__":
     """
 
 
-    tokens1 = [
-        Token("keyword", "class"),
-        Token("identifier", "Main"),
-        Token("symbol", "{"),
-        Token("symbol", "}")
-    ]
-    parser1 = CompilerParser(tokens1)
-    try:
-        result1 = parser1.compileProgram()
-        print("Test Case 1 Passed: Valid Class Parsing")
-        print(result1)
-    except Exception as e:
-        print("Test Case 1 Failed: Valid Class Parsing")
-        print(str(e))
+    # tokens1 = [
+    #     Token("keyword", "class"),
+    #     Token("identifier", "Main"),
+    #     Token("symbol", "{"),
+    #     Token("symbol", "}")
+    # ]
+    # parser1 = CompilerParser(tokens1)
+    # try:
+    #     result1 = parser1.compileProgram()
+    #     print("Test Case 1 Passed: Valid Class Parsing")
+    #     print(result1)
+    # except Exception as e:
+    #     print("Test Case 1 Failed: Valid Class Parsing")
+    #     print(str(e))
 
         
 
@@ -444,52 +547,35 @@ if __name__ == "__main__":
     #     print("Test Case 3 Failed:", str(e))
 
 
+    tokens4 = [
+        Token("keyword", "function"),
+        Token("keyword", "void"),
+        Token("identifier", "myFunc"),
+        Token("symbol", "("),
+        Token("keyword", "int"),
+        Token("identifier", "a"),
+        Token("symbol", ")"),
+        Token("symbol", "{"),
+        Token("keyword", "var"),
+        Token("keyword", "int"),
+        Token("identifier", "a"),
+        Token("symbol", ";"),
+        Token("keyword", "let"),
+        Token("identifier", "a"),
+        Token("symbol", "="),
+        Token("integerConstant", "1"),
+        Token("symbol", ";"),
+        Token("symbol", "}")
+    ]
 
-    # test_cases = [
-    #     {
-    #         'description': 'Valid function with parameters',
-    #         'tokens': [
-    #             Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "sum"),
-    #             Token("symbol", "("), Token("identifier", "int"), Token("identifier", "a"),
-    #             Token("symbol", ","), Token("identifier", "int"), Token("identifier", "b"),
-    #             Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
-    #         ]
-    #     },
-    #     {
-    #         'description': 'Valid method with no parameters',
-    #         'tokens': [
-    #             Token("keyword", "method"), Token("identifier", "void"), Token("identifier", "display"),
-    #             Token("symbol", "("), Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
-    #         ]
-    #     },
-    #     {
-    #         'description': 'Constructor with parameters',
-    #         'tokens': [
-    #             Token("keyword", "constructor"), Token("identifier", "Main"), Token("identifier", "Main"),
-    #             Token("symbol", "("), Token("identifier", "int"), Token("identifier", "size"),
-    #             Token("symbol", ")"), Token("symbol", "{"), Token("symbol", "}")
-    #         ]
-    #     },
-    #     {
-    #         'description': 'Invalid subroutine (missing closing brace)',
-    #         'tokens': [
-    #             Token("keyword", "function"), Token("identifier", "int"), Token("identifier", "broken"),
-    #             Token("symbol", "("), Token("identifier", "int"), Token("identifier", "param"),
-    #             Token("symbol", ")"), Token("symbol", "{")
-    #         ]  # Missing closing '}' to simulate an error case.
-    #     }
-    # ]
+    parser = CompilerParser(tokens4)
+    try:
+        result = parser.compileSubroutine()
+        print(result)
+    except Exception as e:
+        print(f"Error encountered during parsing: {str(e)}")
+        # Optionally, print debugging details here
 
-    # for case in test_cases:
-    #     parser = CompilerParser(case['tokens'])
-    #     try:
-    #         result = parser.compileSubroutine()
-    #         print(f"{case['description']}: PASSED")
-    #         print("Resulting Parse Tree:")
-    #         print(result)
-    #     except ParseException as e:
-    #         print(f"{case['description']}: FAILED")
-    #         print(f"Error: {e}")
 
 
     # tests = [
