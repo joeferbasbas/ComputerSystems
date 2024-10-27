@@ -97,13 +97,17 @@ class CompilerParser :
         subroutineKeyword = self.mustBe("keyword", None)
         subroutineTree.addChild(ParseTree("keyword", subroutineKeyword.getValue()))
 
-        # Parse the return type (e.g., void, int)
-        returnType = self.mustBe("keyword", None)
-        subroutineTree.addChild(ParseTree("returnType", returnType.getValue()))
-
         # Parse the subroutine name (e.g., test)
-        subroutineName = self.mustBe("identifier", None)
-        subroutineTree.addChild(ParseTree("identifier", subroutineName.getValue()))
+        while self.current().getType() == "identifier":
+            subroutineName = self.mustBe("identifier", None)
+            subroutineTree.addChild(ParseTree("identifier", subroutineName.getValue()))
+
+        # Parse the return type (e.g., void, int)
+        if self.current().getType() == "keyword":
+            returnType = self.mustBe("keyword", None)
+            subroutineTree.addChild(ParseTree("returnType", returnType.getValue()))
+
+        
 
         # Parse the parameter list
         self.mustBe("symbol", "(")
@@ -560,74 +564,74 @@ if __name__ == "__main__":
     #     print("Test Case 2 Passed: Error correctly thrown\n")
     #     print(str(e))
 
-    tokens2 = [
-        Token("keyword", "field"),        # 'field' keyword
-        Token("keyword", "boolean"),      # 'boolean' type
-        Token("identifier", "test1"),     # first variable
-        Token("symbol", ","),             # comma
-        Token("identifier", "test2"),     # second variable
-        Token("symbol", ";")              # semicolon
-    ]
+    # tokens2 = [
+    #     Token("keyword", "field"),        # 'field' keyword
+    #     Token("keyword", "boolean"),      # 'boolean' type
+    #     Token("identifier", "test1"),     # first variable
+    #     Token("symbol", ","),             # comma
+    #     Token("identifier", "test2"),     # second variable
+    #     Token("symbol", ";")              # semicolon
+    # ]
 
-    # Initialize the parser with these tokens
-    parser = CompilerParser(tokens2)
+    # # Initialize the parser with these tokens
+    # parser = CompilerParser(tokens2)
 
-    try:
-        # Attempt to parse the class variable declaration
-        result = parser.compileClassVarDec()
-        print(result)  # This will print the resulting parse tree
-    except Exception as e:
-        print("ParseException Occurred")
-        print(str(e))  # Print the error for debugging
+    # try:
+    #     # Attempt to parse the class variable declaration
+    #     result = parser.compileClassVarDec()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e))  # Print the error for debugging
 
     print('\n')
 
-    tokens3 = [
-        Token("keyword", "class"),
-        Token("identifier", "Main"),
-        Token("symbol", "{"),
-        Token("keyword", "static"),
-        Token("keyword", "int"),
-        Token("identifier", "a"),
-        Token("symbol", ";"),
-        Token("symbol", "}")
-    ]
-    parser2 = CompilerParser(tokens3)
-    try:
-        result2 = parser2.compileProgram()
-        print(result2)
-    except Exception as e:
-        print("Test Case 3 Failed:", str(e))
+    # tokens3 = [
+    #     Token("keyword", "class"),
+    #     Token("identifier", "Main"),
+    #     Token("symbol", "{"),
+    #     Token("keyword", "static"),
+    #     Token("keyword", "int"),
+    #     Token("identifier", "a"),
+    #     Token("symbol", ";"),
+    #     Token("symbol", "}")
+    # ]
+    # parser2 = CompilerParser(tokens3)
+    # try:
+    #     result2 = parser2.compileProgram()
+    #     print(result2)
+    # except Exception as e:
+    #     print("Test Case 3 Failed:", str(e))
 
 
-    tokens4 = [
-        Token("keyword", "function"),
-        Token("keyword", "void"),
-        Token("identifier", "myFunc"),
-        Token("symbol", "("),
-        Token("keyword", "int"),
-        Token("identifier", "a"),
-        Token("symbol", ")"),
-        Token("symbol", "{"),
-        Token("keyword", "var"),
-        Token("keyword", "int"),
-        Token("identifier", "a"),
-        Token("symbol", ";"),
-        Token("keyword", "let"),
-        Token("identifier", "a"),
-        Token("symbol", "="),
-        Token("integerConstant", "1"),
-        Token("symbol", ";"),
-        Token("symbol", "}")
-    ]
+    # tokens4 = [
+    #     Token("keyword", "function"),
+    #     Token("keyword", "void"),
+    #     Token("identifier", "myFunc"),
+    #     Token("symbol", "("),
+    #     Token("keyword", "int"),
+    #     Token("identifier", "a"),
+    #     Token("symbol", ")"),
+    #     Token("symbol", "{"),
+    #     Token("keyword", "var"),
+    #     Token("keyword", "int"),
+    #     Token("identifier", "a"),
+    #     Token("symbol", ";"),
+    #     Token("keyword", "let"),
+    #     Token("identifier", "a"),
+    #     Token("symbol", "="),
+    #     Token("integerConstant", "1"),
+    #     Token("symbol", ";"),
+    #     Token("symbol", "}")
+    # ]
 
-    parser = CompilerParser(tokens4)
-    try:
-        result = parser.compileSubroutine()
-        print(result)
-    except Exception as e:
-        print(f"Error encountered during parsing: {str(e)}")
-        # Optionally, print debugging details here
+    # parser = CompilerParser(tokens4)
+    # try:
+    #     result = parser.compileSubroutine()
+    #     print(result)
+    # except Exception as e:
+    #     print(f"Error encountered during parsing: {str(e)}")
+    #     # Optionally, print debugging details here
 
 
 
@@ -663,3 +667,25 @@ if __name__ == "__main__":
     #         print(f"Test '{test['description']}' passed. Result: {result}")
     #     except Exception as e:
     #         print(f"Test '{test['description']}' failed with an error: {str(e)}")
+
+
+    tokens = [
+    Token("keyword", "constructor"),  # 'constructor' keyword
+    Token("identifier", "Test"),      # Class type 'Test'
+    Token("identifier", "new"),       # Constructor name 'new'
+    Token("symbol", "("),             # Opening parenthesis for parameters
+    Token("symbol", ")"),             # Closing parenthesis for parameters
+    Token("symbol", "{"),             # Opening brace for constructor body
+    Token("symbol", "}"),             # Closing brace for constructor body
+    ]
+
+    # Initialize the parser with these tokens
+    parser = CompilerParser(tokens)
+
+    try:
+        # Attempt to parse the constructor
+        result = parser.compileSubroutine()
+        print(result)  # This will print the resulting parse tree
+    except Exception as e:
+        print("ParseException Occurred")
+        print(str(e))  # Print the error for debugging
