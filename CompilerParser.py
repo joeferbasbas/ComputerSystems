@@ -142,7 +142,7 @@ class CompilerParser :
                     paramType = self.mustBe("identifier", None)  # For constructors and class types
 
                 # Add the type as a child node under the parameter
-                parameterListTree.addChild(ParseTree("keyword", paramType.getValue()))
+                parameterListTree.addChild(ParseTree("type", paramType.getValue()))
 
                 # Parse the parameter name (must be an identifier)
                 paramName = self.mustBe("identifier", None)
