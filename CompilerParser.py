@@ -134,19 +134,28 @@ class CompilerParser :
         # Only attempt to parse if we expect parameters (i.e., if the current token is a keyword or identifier)
         if self.current().getType() in ["keyword", "identifier"]:
             while True:
+                # Create a new parameter node
+                paramTree = ParseTree("parameter", "")
+
                 # Parse the parameter type (either a keyword like 'int', 'boolean', or an identifier for class types)
                 if self.current().getType() == "keyword":
                     paramType = self.mustBe("keyword", None)
                 else:
                     paramType = self.mustBe("identifier", None)  # For constructors and class types
 
+                # Add the type as a child node under the parameter
+                paramTree.addChild(ParseTree("type", paramType.getValue()))
+
                 # Parse the parameter name (must be an identifier)
                 paramName = self.mustBe("identifier", None)
 
-                # Add both the type and the name as a parameter node
-                parameterListTree.addChild(ParseTree(paramType.getValue(), paramName.getValue()))
+                # Add the name as a child node under the parameter
+                paramTree.addChild(ParseTree("name", paramName.getValue()))
 
-                # Check if there is another parameter (comma)
+                # Add the parameter node to the parameter list
+                parameterListTree.addChild(paramTree)
+
+                # Check if there is another parameter (comma), or if we've reached the end of the list
                 if self.position < len(self.tokens) and self.current().getValue() == ",":
                     self.next()  # Skip the comma and continue with the next parameter
                 else:
