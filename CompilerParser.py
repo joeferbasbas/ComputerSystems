@@ -130,18 +130,34 @@ class CompilerParser :
         @return a ParseTree that represents a subroutine's parameters
         """
         parameterListTree = ParseTree("parameterList", "")
-
-            # Only attempt to parse if we expect parameters (i.e., if the current token is a keyword or identifier)
-        if self.current().getType() == "keyword":
+    
+        # Check for parameters (i.e., if the current token is a keyword or identifier)
+        if self.current().getType() in ["keyword", "identifier"]:
             while True:
-                paramType = self.mustBe("keyword", None)  # Expect parameter type
-                paramName = self.mustBe("identifier", None)  # Expect parameter name
+                print(f"Current token before parsing parameter type: {self.current().getValue()} ({self.current().getType()})")  # Debugging
+                
+                # Parse the parameter type (either a keyword like 'int', 'boolean', or an identifier for class types)
+                if self.current().getType() == "keyword":
+                    paramType = self.mustBe("keyword", None)  # Expect keyword type (e.g., int, boolean)
+                else:
+                    paramType = self.mustBe("identifier", None)  # Expect identifier for class types (e.g., Test)
+                
+                print(f"Parsed parameter type: {paramType.getValue()}")  # Debugging
+
+                # Parse the parameter name (must be an identifier)
+                paramName = self.mustBe("identifier", None)  # Expect identifier for parameter name (e.g., a, b)
+                print(f"Parsed parameter name: {paramName.getValue()}")  # Debugging
+
+                # Add both the type and the name as a parameter node
                 parameterListTree.addChild(ParseTree("parameter", f"{paramType.getValue()} {paramName.getValue()}"))
 
+                # Check if there is another parameter (comma), or if we've reached the end of the list
                 if self.current().getValue() == ",":
-                    self.next()  # Skip comma, continue with next parameter
+                    print(f"Found comma, expecting another parameter...")  # Debugging
+                    self.next()  # Skip the comma and continue with the next parameter
                 else:
-                    break
+                    print(f"End of parameter list. Current token: {self.current().getValue()}")  # Debugging
+                    break  # No more parameters, exit the loop
 
         return parameterListTree
         
@@ -200,40 +216,19 @@ class CompilerParser :
         Generates a parse tree for a variable declaration
         @return a ParseTree that represents a var declaration
         """
-        varDecTree = ParseTree("classVarDec", "")
+        varDecTree = ParseTree("varDec", "")  # Changed to "varDec" for local variable declarations
     
-        # Parse the keyword 'field' or 'static'
-        keywordToken = self.mustBe("keyword", None)
-        print(f"Parsed keyword: {keywordToken.getValue()}")  # Debugging
-        varDecTree.addChild(ParseTree("keyword", keywordToken.getValue()))
-
-        # Parse the type (e.g., 'boolean', 'int', 'char', etc.)
-        typeToken = self.mustBe("keyword", None)
-        print(f"Parsed type: {typeToken.getValue()}")  # Debugging
-        varDecTree.addChild(ParseTree("type", typeToken.getValue()))
-
-        # Parse the first variable name
-        varNameToken = self.mustBe("identifier", None)
-        print(f"Parsed variable: {varNameToken.getValue()}")  # Debugging
-        varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
-
-        # Handle additional variables separated by commas
-        print(f"Current token before loop: {self.current().getValue()}")  # Debugging
-
-        while self.current().getValue() == ",":
-            print(f"Found comma, expecting another variable...")  # Debugging
-            self.next()  # Move past the comma
-            print(f"Moved past comma. Current token: {self.current().getValue()}")  # Debugging
-            
-            varNameToken = self.mustBe("identifier", None)  # Expect another variable name after the comma
-            print(f"Parsed variable: {varNameToken.getValue()}")  # Debugging
-            varDecTree.addChild(ParseTree("identifier", varNameToken.getValue()))
-
-
-        # Expect a semicolon at the end of the declaration
+        # Parse the keyword 'int', 'boolean', etc.
+        varType = self.mustBe("keyword", None)
+        varDecTree.addChild(ParseTree("type", varType.getValue()))  # Add the type to the parse tree
+        
+        # Parse the variable name (identifier)
+        varName = self.mustBe("identifier", None)
+        varDecTree.addChild(ParseTree("identifier", varName.getValue()))  # Add the variable name to the parse tree
+        
+        # Expect a semicolon to terminate the declaration
         self.mustBe("symbol", ";")
-        print(f"Found semicolon, end of declaration.")  # Debugging
-        varDecTree.addChild(ParseTree("symbol", ";"))
+        varDecTree.addChild(ParseTree("symbol", ";"))  # Add the semicolon to the parse tree
 
         return varDecTree
     
@@ -668,22 +663,39 @@ if __name__ == "__main__":
     #         print(f"Test '{test['description']}' failed with an error: {str(e)}")
 
 
+    # tokens = [
+    # Token("keyword", "constructor"),  # 'constructor' keyword
+    # Token("identifier", "Test"),      # Class type 'Test'
+    # Token("identifier", "new"),       # Constructor name 'new'
+    # Token("symbol", "("),             # Opening parenthesis for parameters
+    # Token("symbol", ")"),             # Closing parenthesis for parameters
+    # Token("symbol", "{"),             # Opening brace for constructor body
+    # Token("symbol", "}"),             # Closing brace for constructor body
+    # ]
+
+    # # Initialize the parser with these tokens
+    # parser = CompilerParser(tokens)
+
+    # try:
+    #     # Attempt to parse the constructor
+    #     result = parser.compileSubroutine()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e))  # Print the error for debugging
+
     tokens = [
-    Token("keyword", "constructor"),  # 'constructor' keyword
-    Token("identifier", "Test"),      # Class type 'Test'
-    Token("identifier", "new"),       # Constructor name 'new'
-    Token("symbol", "("),             # Opening parenthesis for parameters
-    Token("symbol", ")"),             # Closing parenthesis for parameters
-    Token("symbol", "{"),             # Opening brace for constructor body
-    Token("symbol", "}"),             # Closing brace for constructor body
+    Token("keyword", "int"),          # 'int' type
+    Token("identifier", "a"),         # variable name 'a'
+    Token("symbol", ";")              # semicolon to terminate the declaration
     ]
 
     # Initialize the parser with these tokens
     parser = CompilerParser(tokens)
 
     try:
-        # Attempt to parse the constructor
-        result = parser.compileSubroutine()
+        # Attempt to parse the variable declaration
+        result = parser.compileVarDec()
         print(result)  # This will print the resulting parse tree
     except Exception as e:
         print("ParseException Occurred")
