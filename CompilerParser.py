@@ -764,15 +764,15 @@ if __name__ == "__main__":
 
     Token("keyword", "return"),       # 'return' keyword
     Token("symbol", ";"),             # semicolon for 'return' statement termination
-]
+    ]
 
-# Initialize the parser with these tokens
-parser = CompilerParser(tokens10)
+    # Initialize the parser with these tokens
+    parser = CompilerParser(tokens10)
 
-try:
-    # Attempt to parse the statements
-    result = parser.compileStatements()
-    print(result)  # This will print the resulting parse tree
-except Exception as e:
-    print("ParseException Occurred")
-    print(str(e))  # Print the error for debugging
+    try:
+        # Attempt to parse the statements
+        result = parser.compileStatements()
+        print(result)  # This will print the resulting parse tree
+    except Exception as e:
+        print("ParseException Occurred")
+        print(str(e))  # Print the error for debugging
