@@ -236,7 +236,23 @@ class CompilerParser :
         Generates a parse tree for a series of statements
         @return a ParseTree that represents the series of statements
         """
-        return None
+        statementsTree = ParseTree("statements", "")
+
+        # While there are tokens and the current token is a keyword
+        while self.position < len(self.tokens) and self.current().getType() in ["keyword"]:
+            if self.current().getValue() == "let":
+                letStatementTree = self.compileLet()
+                statementsTree.addChild(letStatementTree)
+            elif self.current().getValue() == "do":
+                doStatementTree = self.compileDo()
+                statementsTree.addChild(doStatementTree)
+            elif self.current().getValue() == "return":
+                returnStatementTree = self.compileReturn()
+                statementsTree.addChild(returnStatementTree)
+            else:
+                break  # No valid statement found, exit loop
+
+        return statementsTree
     
     
     def compileLet(self):
@@ -244,24 +260,17 @@ class CompilerParser :
         Generates a parse tree for a let statement
         @return a ParseTree that represents the statement
         """
-        print(f"Parsing let statement at token: {self.current()}")
+        letTree = ParseTree("letStatement", "")
     
-        self.mustBe("keyword", "let")
-        varName = self.mustBe("identifier", None)
+        self.mustBe("keyword", "let")  # 'let' keyword
+        varName = self.mustBe("identifier", None)  # Variable name
+        letTree.addChild(ParseTree("identifier", varName.getValue()))
         
-        if varName is None:
-            raise ValueError("Expected an identifier for variable name in let statement, got None.")
+        self.mustBe("symbol", "=")  # '=' symbol
+        exprTree = self.compileExpression()  # Expression or function call (like 'skip')
+        letTree.addChild(exprTree)
         
-        letTree = ParseTree("letStatement", varName.getValue())
-
-        if self.current().getValue() == "=":
-            self.next()  # Skip over the '=' symbol
-            exprTree = self.compileExpression()
-            if exprTree is None:
-                raise ValueError("Expected an expression in let statement after '=' but got None.")
-            letTree.addChild(exprTree)
-            self.mustBe("symbol", ";")  # Expect a semicolon at the end of the statement
-
+        self.mustBe("symbol", ";")  # End with ';'
         return letTree
         
 
@@ -362,19 +371,31 @@ class CompilerParser :
         """
         doTree = ParseTree("doStatement", "")
     
-        # 'do' keyword
-        self.mustBe("keyword", "do")
-        doTree.addChild(ParseTree("keyword", "do"))
+        self.mustBe("keyword", "do")  
+
+        subroutineCallTree = ParseTree("subroutineCall", "")
+
+        subroutineName = self.mustBe("identifier", None)
+        subroutineCallTree.addChild(ParseTree("identifier", subroutineName.getValue()))
+
+        # Check if it's a method call (i.e., look for a dot)
+        if self.current().getValue() == ".":
+            self.mustBe("symbol", ".")  # Skip the dot
+            methodName = self.mustBe("identifier", None)  # Parse the method name
+            subroutineCallTree.addChild(ParseTree("identifier", methodName.getValue()))
+
+        # Check if there are parentheses (i.e., subroutine call with arguments)
+        if self.current().getValue() == "(":
+            self.mustBe("symbol", "(")
+            exprListTree = self.compileExpressionList()  # Parse the arguments
+            subroutineCallTree.addChild(exprListTree)
+            self.mustBe("symbol", ")")
         
-        # Parse the subroutine call
-        subroutineCallTree = self.compileExpressionList()  # Assuming you have a method for parsing subroutine calls
-        
-        if subroutineCallTree:
-            doTree.addChild(subroutineCallTree)
-        
-        # Expect a semicolon ';' at the end of the do statement
+        doTree.addChild(subroutineCallTree)  # Add the subroutine call to the 'do' statement
+
+        # Expect a semicolon to terminate the 'do' statement
         self.mustBe("symbol", ";")
-        
+
         return doTree
 
 
@@ -387,13 +408,10 @@ class CompilerParser :
     
         # 'return' keyword
         self.mustBe("keyword", "return")
-        returnTree.addChild(ParseTree("keyword", "return"))
         
-        # Check if there's an expression to return
         if self.current().getValue() != ";":
             expressionTree = self.compileExpression()
-            if expressionTree:
-                returnTree.addChild(expressionTree)
+            returnTree.addChild(expressionTree)
         
         # Expect a semicolon ';' at the end of the return statement
         self.mustBe("symbol", ";")
@@ -444,9 +462,9 @@ class CompilerParser :
             self.next()  # Move to the next token
             return termTree
 
-        # Handle identifiers (variables or subroutine calls)
-        elif currentToken.getType() == "identifier":
-            termTree = ParseTree("identifier", currentToken.getValue())
+        # Handle identifiers (e.g., variables, subroutine calls, or keywords like 'skip')
+        elif currentToken.getType() == "identifier" or currentToken.getType() == "keyword":
+            termTree = ParseTree("identifier", currentToken.getValue())  # Treat it as an identifier
             self.next()  # Move to the next token
             return termTree
 
@@ -466,7 +484,21 @@ class CompilerParser :
         Generates a parse tree for an expression list
         @return a ParseTree that represents the expression list
         """
-        return None 
+        exprListTree = ParseTree("expressionList", "")
+
+        # Check if there are any expressions to parse (if not, it will be an empty list)
+        if self.current().getValue() != ")":
+            while True:
+                exprTree = self.compileExpression()  # Parse each argument (expression)
+                exprListTree.addChild(exprTree)
+
+                # If a comma is present, continue parsing more expressions
+                if self.current().getValue() == ",":
+                    self.mustBe("symbol", ",")
+                else:
+                    break  # No more arguments
+
+        return exprListTree
 
 
     def next(self):
@@ -508,10 +540,10 @@ class CompilerParser :
         If so, advance to the next token, returning the current token, otherwise throw/raise a ParseException.
         @return token that was current prior to advancing.
         """
-        currToken = self.current()  # Get the current token
+        currToken = self.current()  
         if not self.have(expectedType, expectedValue):
             raise ParseException(f"Expected {expectedType} '{expectedValue}', but found {currToken.getType()} '{currToken.getValue()}'")
-        self.next()  # Only advance if the check passes
+        self.next()
         return currToken
 
 if __name__ == "__main__":
@@ -571,6 +603,26 @@ if __name__ == "__main__":
     # try:
     #     # Attempt to parse the class variable declaration
     #     result = parser.compileClassVarDec()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e))  # Print the error for debugging
+
+
+    # tokens = [
+    # Token("keyword", "int"),          # 'int' type
+    # Token("identifier", "a"),         # variable name 'a'
+    # Token("symbol", ","),             # comma
+    # Token("keyword", "char"),         # 'char' type
+    # Token("identifier", "b"),         # variable name 'b'
+    # ]
+
+    # # Initialize the parser with these tokens
+    # parser = CompilerParser(tokens)
+
+    # try:
+    #     # Attempt to parse the parameter list
+    #     result = parser.compileParameterList()
     #     print(result)  # This will print the resulting parse tree
     # except Exception as e:
     #     print("ParseException Occurred")
@@ -682,18 +734,45 @@ if __name__ == "__main__":
     #     print("ParseException Occurred")
     #     print(str(e))  # Print the error for debugging
 
+    # tokens = [
+    # Token("keyword", "int"),          # 'int' type
+    # Token("identifier", "a"),         # variable name 'a'
+    # ]
+
+    # # Initialize the parser with these tokens
+    # parser = CompilerParser(tokens)
+
+    # try:
+    #     # Attempt to parse the parameter list
+    #     result = parser.compileParameterList()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e)) 
+
+
     tokens = [
-    Token("keyword", "int"),          # 'int' type
+    Token("keyword", "let"),          # 'let' keyword
     Token("identifier", "a"),         # variable name 'a'
-    ]
+    Token("symbol", "="),             # '=' symbol
+    Token("keyword", "skip"),         # keyword 'skip' (in place of an expression or call)
+    Token("symbol", ";"),             # semicolon for 'let' statement termination
 
-    # Initialize the parser with these tokens
-    parser = CompilerParser(tokens)
+    Token("keyword", "do"),           # 'do' keyword
+    Token("identifier", "skip"),      # function call 'skip'
+    Token("symbol", ";"),             # semicolon for 'do' statement termination
 
-    try:
-        # Attempt to parse the parameter list
-        result = parser.compileParameterList()
-        print(result)  # This will print the resulting parse tree
-    except Exception as e:
-        print("ParseException Occurred")
-        print(str(e)) 
+    Token("keyword", "return"),       # 'return' keyword
+    Token("symbol", ";"),             # semicolon for 'return' statement termination
+]
+
+# Initialize the parser with these tokens
+parser = CompilerParser(tokens)
+
+try:
+    # Attempt to parse the statements
+    result = parser.compileStatements()
+    print(result)  # This will print the resulting parse tree
+except Exception as e:
+    print("ParseException Occurred")
+    print(str(e))  # Print the error for debugging
