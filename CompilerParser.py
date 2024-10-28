@@ -144,7 +144,7 @@ class CompilerParser :
                 paramName = self.mustBe("identifier", None)
 
                 # Add both the type and the name as a parameter node
-                parameterListTree.addChild(ParseTree("parameter", f"{paramType.getValue()} {paramName.getValue()}"))
+                parameterListTree.addChild(ParseTree(paramType.getValue(), paramName.getValue()))
 
                 # Check if there is another parameter (comma)
                 if self.position < len(self.tokens) and self.current().getValue() == ",":
