@@ -375,8 +375,8 @@ class CompilerParser :
 
         subroutineCallTree = ParseTree("subroutineCall", "")
 
-        subroutineName = self.mustBe("identifier", None)
-        subroutineCallTree.addChild(ParseTree("identifier", subroutineName.getValue()))
+        subroutineName = self.mustBe("keyword", None)
+        subroutineCallTree.addChild(ParseTree("keyword", subroutineName.getValue()))
 
         # Check if it's a method call (i.e., look for a dot)
         if self.current().getValue() == ".":
@@ -751,28 +751,45 @@ if __name__ == "__main__":
     #     print(str(e)) 
 
 
-    tokens10 = [
-    Token("keyword", "let"),          # 'let' keyword
-    Token("identifier", "a"),         # variable name 'a'
-    Token("symbol", "="),             # '=' symbol
-    Token("keyword", "skip"),         # keyword 'skip' (in place of an expression or call)
-    Token("symbol", ";"),             # semicolon for 'let' statement termination
+    # tokens10 = [
+    # Token("keyword", "let"),          # 'let' keyword
+    # Token("identifier", "a"),         # variable name 'a'
+    # Token("symbol", "="),             # '=' symbol
+    # Token("keyword", "skip"),         # keyword 'skip' (in place of an expression or call)
+    # Token("symbol", ";"),             # semicolon for 'let' statement termination
 
-    Token("keyword", "do"),           # 'do' keyword
-    Token("identifier", "skip"),      # function call 'skip'
-    Token("symbol", ";"),             # semicolon for 'do' statement termination
+    # Token("keyword", "do"),           # 'do' keyword
+    # Token("identifier", "skip"),      # function call 'skip'
+    # Token("symbol", ";"),             # semicolon for 'do' statement termination
 
-    Token("keyword", "return"),       # 'return' keyword
-    Token("symbol", ";"),             # semicolon for 'return' statement termination
+    # Token("keyword", "return"),       # 'return' keyword
+    # Token("symbol", ";"),             # semicolon for 'return' statement termination
+    # ]
+
+    # # Initialize the parser with these tokens
+    # parser = CompilerParser(tokens10)
+
+    # try:
+    #     # Attempt to parse the statements
+    #     result = parser.compileStatements()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e))  # Print the error for debugging
+
+    tokens = [
+    Token("keyword", "do"),      # 'do' keyword
+    Token("keyword", "skip"),    # Function/subroutine call 'skip'
+    Token("symbol", ";"),        # Terminating semicolon
     ]
 
-    # Initialize the parser with these tokens
-    parser = CompilerParser(tokens10)
+    # Initialize the parser with the tokens
+    parser = CompilerParser(tokens)
 
     try:
-        # Attempt to parse the statements
-        result = parser.compileStatements()
+        # Attempt to parse the 'do' statement
+        result = parser.compileDo()
         print(result)  # This will print the resulting parse tree
     except Exception as e:
         print("ParseException Occurred")
-        print(str(e))  # Print the error for debugging
+        print(str(e))
