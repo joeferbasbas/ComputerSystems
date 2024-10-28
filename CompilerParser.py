@@ -373,25 +373,24 @@ class CompilerParser :
     
         self.mustBe("keyword", "do")  
 
-        subroutineCallTree = ParseTree("subroutineCall", "")
+        
 
         subroutineName = self.mustBe("keyword", None)
-        subroutineCallTree.addChild(ParseTree("keyword", subroutineName.getValue()))
+        doTree.addChild(ParseTree("keyword", subroutineName.getValue()))
 
         # Check if it's a method call (i.e., look for a dot)
         if self.current().getValue() == ".":
             self.mustBe("symbol", ".")  # Skip the dot
             methodName = self.mustBe("identifier", None)  # Parse the method name
-            subroutineCallTree.addChild(ParseTree("identifier", methodName.getValue()))
+            doTree.addChild(ParseTree("identifier", methodName.getValue()))
 
         # Check if there are parentheses (i.e., subroutine call with arguments)
         if self.current().getValue() == "(":
             self.mustBe("symbol", "(")
             exprListTree = self.compileExpressionList()  # Parse the arguments
-            subroutineCallTree.addChild(exprListTree)
+            doTree.addChild(exprListTree)
             self.mustBe("symbol", ")")
         
-        doTree.addChild(subroutineCallTree)  # Add the subroutine call to the 'do' statement
 
         # Expect a semicolon to terminate the 'do' statement
         self.mustBe("symbol", ";")
