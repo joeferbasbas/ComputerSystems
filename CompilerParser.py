@@ -751,7 +751,7 @@ if __name__ == "__main__":
     #     print(str(e)) 
 
 
-    tokens = [
+    tokens10 = [
     Token("keyword", "let"),          # 'let' keyword
     Token("identifier", "a"),         # variable name 'a'
     Token("symbol", "="),             # '=' symbol
@@ -767,7 +767,7 @@ if __name__ == "__main__":
 ]
 
 # Initialize the parser with these tokens
-parser = CompilerParser(tokens)
+parser = CompilerParser(tokens10)
 
 try:
     # Attempt to parse the statements
