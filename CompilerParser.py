@@ -142,7 +142,7 @@ class CompilerParser :
                     paramType = self.mustBe("identifier", None)  # For constructors and class types
 
                 # Add the type as a child node under the parameter
-                parameterListTree.addChild(ParseTree("type", paramType.getValue()))
+                parameterListTree.addChild(ParseTree("keyword", paramType.getValue()))
 
                 # Parse the parameter name (must be an identifier)
                 paramName = self.mustBe("identifier", None)
@@ -733,21 +733,21 @@ if __name__ == "__main__":
     #     print("ParseException Occurred")
     #     print(str(e))  # Print the error for debugging
 
-    # tokens = [
-    # Token("keyword", "int"),          # 'int' type
-    # Token("identifier", "a"),         # variable name 'a'
-    # ]
+    tokens = [
+    Token("keyword", "int"),          # 'int' type
+    Token("identifier", "a"),         # variable name 'a'
+    ]
 
-    # # Initialize the parser with these tokens
-    # parser = CompilerParser(tokens)
+    # Initialize the parser with these tokens
+    parser = CompilerParser(tokens)
 
-    # try:
-    #     # Attempt to parse the parameter list
-    #     result = parser.compileParameterList()
-    #     print(result)  # This will print the resulting parse tree
-    # except Exception as e:
-    #     print("ParseException Occurred")
-    #     print(str(e)) 
+    try:
+        # Attempt to parse the parameter list
+        result = parser.compileParameterList()
+        print(result)  # This will print the resulting parse tree
+    except Exception as e:
+        print("ParseException Occurred")
+        print(str(e)) 
 
 
     # tokens10 = [
