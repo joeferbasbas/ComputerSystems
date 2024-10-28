@@ -148,7 +148,7 @@ class CompilerParser :
                 paramName = self.mustBe("identifier", None)
 
                 # Add the name as a child node under the parameter
-                parameterListTree.addChild(ParseTree("name", paramName.getValue()))
+                parameterListTree.addChild(ParseTree("identifier", paramName.getValue()))
 
 
                 # Check if there is another parameter (comma), or if we've reached the end of the list
