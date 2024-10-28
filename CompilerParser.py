@@ -130,33 +130,26 @@ class CompilerParser :
         @return a ParseTree that represents a subroutine's parameters
         """
         parameterListTree = ParseTree("parameterList", "")
-    
-        # Check for parameters (i.e., if the current token is a keyword or identifier)
+
+        # Only attempt to parse if we expect parameters (i.e., if the current token is a keyword or identifier)
         if self.current().getType() in ["keyword", "identifier"]:
             while True:
-                print(f"Current token before parsing parameter type: {self.current().getValue()} ({self.current().getType()})")  # Debugging
-                
                 # Parse the parameter type (either a keyword like 'int', 'boolean', or an identifier for class types)
                 if self.current().getType() == "keyword":
-                    paramType = self.mustBe("keyword", None)  # Expect keyword type (e.g., int, boolean)
+                    paramType = self.mustBe("keyword", None)
                 else:
-                    paramType = self.mustBe("identifier", None)  # Expect identifier for class types (e.g., Test)
-                
-                print(f"Parsed parameter type: {paramType.getValue()}")  # Debugging
+                    paramType = self.mustBe("identifier", None)  # For constructors and class types
 
                 # Parse the parameter name (must be an identifier)
-                paramName = self.mustBe("identifier", None)  # Expect identifier for parameter name (e.g., a, b)
-                print(f"Parsed parameter name: {paramName.getValue()}")  # Debugging
+                paramName = self.mustBe("identifier", None)
 
                 # Add both the type and the name as a parameter node
                 parameterListTree.addChild(ParseTree("parameter", f"{paramType.getValue()} {paramName.getValue()}"))
 
-                # Check if there is another parameter (comma), or if we've reached the end of the list
-                if self.current().getValue() == ",":
-                    print(f"Found comma, expecting another parameter...")  # Debugging
+                # Check if there is another parameter (comma)
+                if self.position < len(self.tokens) and self.current().getValue() == ",":
                     self.next()  # Skip the comma and continue with the next parameter
                 else:
-                    print(f"End of parameter list. Current token: {self.current().getValue()}")  # Debugging
                     break  # No more parameters, exit the loop
 
         return parameterListTree
@@ -687,16 +680,15 @@ if __name__ == "__main__":
     tokens = [
     Token("keyword", "int"),          # 'int' type
     Token("identifier", "a"),         # variable name 'a'
-    Token("symbol", ";")              # semicolon to terminate the declaration
     ]
 
     # Initialize the parser with these tokens
     parser = CompilerParser(tokens)
 
     try:
-        # Attempt to parse the variable declaration
-        result = parser.compileVarDec()
+        # Attempt to parse the parameter list
+        result = parser.compileParameterList()
         print(result)  # This will print the resulting parse tree
     except Exception as e:
         print("ParseException Occurred")
-        print(str(e))  # Print the error for debugging
+        print(str(e)) 
