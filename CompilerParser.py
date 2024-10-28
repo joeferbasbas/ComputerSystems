@@ -215,21 +215,24 @@ class CompilerParser :
         @return a ParseTree that represents a var declaration
         """
         varDecTree = ParseTree("varDec", "")  # Changed to "varDec" for local variable declarations
-    
-        # Parse the keyword 'int', 'boolean', etc.
+
+        # Expect the 'var' keyword
+        varKeyword = self.mustBe("keyword", "var")  # Ensure 'var' is correctly parsed as a keyword
+        varDecTree.addChild(ParseTree("keyword", varKeyword.getValue()))  # Add 'var' as a keyword
+
+        # Parse the type (e.g., 'int', 'boolean', etc.)
         varType = self.mustBe("keyword", None)
         varDecTree.addChild(ParseTree("type", varType.getValue()))  # Add the type to the parse tree
-        
+
         # Parse the variable name (identifier)
         varName = self.mustBe("identifier", None)
         varDecTree.addChild(ParseTree("identifier", varName.getValue()))  # Add the variable name to the parse tree
-        
+
         # Expect a semicolon to terminate the declaration
         self.mustBe("symbol", ";")
         varDecTree.addChild(ParseTree("symbol", ";"))  # Add the semicolon to the parse tree
 
         return varDecTree
-    
 
     def compileStatements(self):
         """
@@ -733,21 +736,21 @@ if __name__ == "__main__":
     #     print("ParseException Occurred")
     #     print(str(e))  # Print the error for debugging
 
-    tokens = [
-    Token("keyword", "int"),          # 'int' type
-    Token("identifier", "a"),         # variable name 'a'
-    ]
+    # tokens = [
+    # Token("keyword", "int"),          # 'int' type
+    # Token("identifier", "a"),         # variable name 'a'
+    # ]
 
-    # Initialize the parser with these tokens
-    parser = CompilerParser(tokens)
+    # # Initialize the parser with these tokens
+    # parser = CompilerParser(tokens)
 
-    try:
-        # Attempt to parse the parameter list
-        result = parser.compileParameterList()
-        print(result)  # This will print the resulting parse tree
-    except Exception as e:
-        print("ParseException Occurred")
-        print(str(e)) 
+    # try:
+    #     # Attempt to parse the parameter list
+    #     result = parser.compileParameterList()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e)) 
 
 
     # tokens10 = [
@@ -776,18 +779,36 @@ if __name__ == "__main__":
     #     print("ParseException Occurred")
     #     print(str(e))  # Print the error for debugging
 
-    tokens = [
-    Token("keyword", "do"),      # 'do' keyword
-    Token("keyword", "skip"),    # Function/subroutine call 'skip'
-    Token("symbol", ";"),        # Terminating semicolon
-    ]
+    # tokens = [
+    # Token("keyword", "do"),      # 'do' keyword
+    # Token("keyword", "skip"),    # Function/subroutine call 'skip'
+    # Token("symbol", ";"),        # Terminating semicolon
+    # ]
 
-    # Initialize the parser with the tokens
+    # # Initialize the parser with the tokens
+    # parser = CompilerParser(tokens)
+
+    # try:
+    #     # Attempt to parse the 'do' statement
+    #     result = parser.compileDo()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e))
+
+    tokens = [
+    Token("symbol", "{"),     
+    Token("keyword", "var"),    
+    Token("keyword", "int"),
+    Token("identifier", "a"),
+    Token("symbol", ";"),   
+    Token("symbol", "}")     
+    ]
     parser = CompilerParser(tokens)
 
     try:
         # Attempt to parse the 'do' statement
-        result = parser.compileDo()
+        result = parser.compileSubroutineBody()
         print(result)  # This will print the resulting parse tree
     except Exception as e:
         print("ParseException Occurred")
