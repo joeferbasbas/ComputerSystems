@@ -167,20 +167,22 @@ class CompilerParser :
         """
         subRoutineBodyListTree = ParseTree("subroutineBody", "")
     
-        while self.current().getValue() != "}":  # Continue until you hit the closing brace
-            # Check if the current token is a variable declaration
+        # Add the opening brace '{' to the parse tree
+        openingBrace = self.mustBe("symbol", "{")  # Parse the opening '{'
+        subRoutineBodyListTree.addChild(ParseTree("symbol", openingBrace.getValue()))  # Add '{' to the tree
+    
+        # Continue parsing statements until we hit the closing brace '}'
+        while self.current().getValue() != "}":
             if self.current().getValue() == "var":
                 varDecTree = self.compileVarDec()
                 if varDecTree:
                     subRoutineBodyListTree.addChild(varDecTree)
             
-            # Check if the current token is a let statement
             elif self.current().getValue() == "let":
                 letTree = self.compileLet()
                 if letTree:
                     subRoutineBodyListTree.addChild(letTree)
             
-            # Handle other possible statements in the subroutine body
             elif self.current().getValue() == "return":
                 returnTree = self.compileReturn()
                 if returnTree:
@@ -202,10 +204,13 @@ class CompilerParser :
                     subRoutineBodyListTree.addChild(ifTree)
             
             else:
-                self.next()  # Skip any tokens that don't start a valid statement
+                self.next()  # Skip tokens that don't start valid statements
+
+        # Add the closing brace '}' to the parse tree
+        closingBrace = self.mustBe("symbol", "}")  # Parse the closing '}'
+        subRoutineBodyListTree.addChild(ParseTree("symbol", closingBrace.getValue()))  # Add '}' to the tree
 
         return subRoutineBodyListTree
-
 
     
     
@@ -227,6 +232,7 @@ class CompilerParser :
         # Parse the variable name (identifier)
         varName = self.mustBe("identifier", None)
         varDecTree.addChild(ParseTree("identifier", varName.getValue()))  # Add the variable name to the parse tree
+
 
         # Expect a semicolon to terminate the declaration
         self.mustBe("symbol", ";")
@@ -263,17 +269,23 @@ class CompilerParser :
         Generates a parse tree for a let statement
         @return a ParseTree that represents the statement
         """
-        letTree = ParseTree("letStatement", "")
+        letTree = ParseTree("letStatement", "")  # Create the 'letStatement' node
     
-        self.mustBe("keyword", "let")  # 'let' keyword
-        varName = self.mustBe("identifier", None)  # Variable name
-        letTree.addChild(ParseTree("identifier", varName.getValue()))
+        self.mustBe("keyword", "let")  # Parse the 'let' keyword
+        varName = self.mustBe("identifier", None)  # Parse the variable name
+        letTree.addChild(ParseTree("identifier", varName.getValue()))  # Add the identifier
         
-        self.mustBe("symbol", "=")  # '=' symbol
-        exprTree = self.compileExpression()  # Expression or function call (like 'skip')
-        letTree.addChild(exprTree)
+        # This part ensures the '=' symbol is added to the parse tree
+        equalsToken = self.mustBe("symbol", "=")  # Parse the '=' symbol
+        letTree.addChild(ParseTree("symbol", equalsToken.getValue()))  # Add the '=' symbol to the tree
         
-        self.mustBe("symbol", ";")  # End with ';'
+        exprTree = self.compileExpression()  # Parse the expression
+        letTree.addChild(exprTree)  # Add the expression to the tree
+        
+        # This part ensures the semicolon is added to the parse tree
+        semicolonToken = self.mustBe("symbol", ";")  # Expect a semicolon
+        letTree.addChild(ParseTree("symbol", semicolonToken.getValue()))  # Add the semicolon to the tree
+        
         return letTree
         
 
@@ -796,20 +808,41 @@ if __name__ == "__main__":
     #     print("ParseException Occurred")
     #     print(str(e))
 
+    # tokens = [
+    # Token("symbol", "{"),     
+    # Token("keyword", "var"),    
+    # Token("keyword", "int"),
+    # Token("identifier", "a"),
+    # Token("symbol", ";"),   
+    # Token("symbol", "}")     
+    # ]
+    # parser = CompilerParser(tokens)
+
+    # try:
+    #     # Attempt to parse the 'do' statement
+    #     result = parser.compileSubroutineBody()
+    #     print(result)  # This will print the resulting parse tree
+    # except Exception as e:
+    #     print("ParseException Occurred")
+    #     print(str(e))
+
     tokens = [
-    Token("symbol", "{"),     
-    Token("keyword", "var"),    
-    Token("keyword", "int"),
-    Token("identifier", "a"),
-    Token("symbol", ";"),   
-    Token("symbol", "}")     
+    Token("symbol", "{"),          # Opening brace for subroutine body
+    Token("keyword", "let"),       # 'let' keyword
+    Token("identifier", "a"),      # Variable name 'a'
+    Token("symbol", "="),          # '=' symbol
+    Token("identifier", "skip"),   # Identifier 'skip' for the expression
+    Token("symbol", ";"),          # Semicolon to terminate the let statement
+    Token("symbol", "}"),          # Closing brace for subroutine body
     ]
+
+    # Initialize the parser with these tokens
     parser = CompilerParser(tokens)
 
     try:
-        # Attempt to parse the 'do' statement
+        # Attempt to parse the subroutine body
         result = parser.compileSubroutineBody()
         print(result)  # This will print the resulting parse tree
     except Exception as e:
         print("ParseException Occurred")
-        print(str(e))
+        print(str(e))  # Print the error for debuggin
