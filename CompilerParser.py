@@ -167,50 +167,37 @@ class CompilerParser :
         """
         subRoutineBodyListTree = ParseTree("subroutineBody", "")
     
-        # Add the opening brace '{' to the parse tree
-        openingBrace = self.mustBe("symbol", "{")  # Parse the opening '{'
-        subRoutineBodyListTree.addChild(ParseTree("symbol", openingBrace.getValue()))  # Add '{' to the tree
-    
-        # Continue parsing statements until we hit the closing brace '}'
-        while self.current().getValue() != "}":
-            if self.current().getValue() == "var":
-                varDecTree = self.compileVarDec()
-                if varDecTree:
-                    subRoutineBodyListTree.addChild(varDecTree)
-            
-            elif self.current().getValue() == "let":
+        self.mustBe("symbol", "{")  # Expect the opening brace '{'
+        
+        # Check for 'var' declarations first
+        while self.current().getValue() == "var":
+            varDecTree = self.compileVarDec()
+            subRoutineBodyListTree.addChild(varDecTree)
+        
+        # After 'var' declarations, compile statements (let, do, return, etc.)
+        while self.current().getValue() in ["let", "do", "return", "if", "while"]:
+            if self.current().getValue() == "let":
                 letTree = self.compileLet()
-                if letTree:
-                    subRoutineBodyListTree.addChild(letTree)
-            
-            elif self.current().getValue() == "return":
-                returnTree = self.compileReturn()
-                if returnTree:
-                    subRoutineBodyListTree.addChild(returnTree)
-            
+                subRoutineBodyListTree.addChild(letTree)
             elif self.current().getValue() == "do":
                 doTree = self.compileDo()
-                if doTree:
-                    subRoutineBodyListTree.addChild(doTree)
-            
+                subRoutineBodyListTree.addChild(doTree)
+            elif self.current().getValue() == "return":
+                returnTree = self.compileReturn()
+                subRoutineBodyListTree.addChild(returnTree)
             elif self.current().getValue() == "while":
                 whileTree = self.compileWhile()
-                if whileTree:
-                    subRoutineBodyListTree.addChild(whileTree)
-            
+                subRoutineBodyListTree.addChild(whileTree)
             elif self.current().getValue() == "if":
                 ifTree = self.compileIf()
-                if ifTree:
-                    subRoutineBodyListTree.addChild(ifTree)
-            
+                subRoutineBodyListTree.addChild(ifTree)
             else:
-                self.next()  # Skip tokens that don't start valid statements
+                self.next()  # Move to the next token
 
-        # Add the closing brace '}' to the parse tree
-        closingBrace = self.mustBe("symbol", "}")  # Parse the closing '}'
-        subRoutineBodyListTree.addChild(ParseTree("symbol", closingBrace.getValue()))  # Add '}' to the tree
-
+        self.mustBe("symbol", "}")  # Expect the closing brace '}'
+        
         return subRoutineBodyListTree
+
 
     
     
